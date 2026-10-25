@@ -18,7 +18,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/text"
+        android:textColor="?attr/zText"
         android:textSize="15sp"
         android:textStyle="bold" />
 
@@ -27,6 +27,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
-        android:textColor="@color/text_dim"
+        android:textColor="?attr/zTextDim"
         android:textSize="12sp" />
 </LinearLayout>

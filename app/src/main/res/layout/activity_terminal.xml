@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/term_bg"
+    android:background="?attr/zTermBg"
     android:orientation="vertical">
 
     <LinearLayout
@@ -20,14 +20,25 @@
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="2"
-            android:textColor="@color/text_dim"
+            android:textColor="?attr/zTextDim"
             android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReconnect"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:text="@string/reconnect"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnClear"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="0dp"
             android:text="@string/clear" />
 
         <com.google.android.material.button.MaterialButton
@@ -35,25 +46,55 @@
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="0dp"
             android:text="@string/copy" />
+
+        <ImageView
+            android:id="@+id/btnMore"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/menu"
+            android:padding="10dp"
+            android:src="@drawable/ic_more" />
     </LinearLayout>
 
-    <ScrollView
-        android:id="@+id/scroll"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/tvOut"
+        <ScrollView
+            android:id="@+id/scroll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="monospace"
-            android:padding="10dp"
-            android:textColor="@color/term_fg"
-            android:textIsSelectable="true"
-            android:textSize="12sp" />
-    </ScrollView>
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tvOut"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="10dp"
+                android:textColor="?attr/zTermFg"
+                android:textIsSelectable="true"
+                android:textSize="12sp" />
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/btnBottom"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_chip"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="↓"
+            android:textColor="?attr/zAccent"
+            android:textSize="20sp"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -87,14 +128,15 @@
             android:fontFamily="monospace"
             android:hint="@string/input_hint"
             android:imeOptions="actionSend"
+            android:importantForAutofill="no"
             android:inputType="text|textNoSuggestions"
             android:maxLines="1"
             android:minHeight="48dp"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:singleLine="true"
-            android:textColor="@color/term_fg"
-            android:textColorHint="@color/text_dim"
+            android:textColor="?attr/zTermFg"
+            android:textColorHint="?attr/zTextDim"
             android:textSize="14sp" />
 
         <com.google.android.material.button.MaterialButton

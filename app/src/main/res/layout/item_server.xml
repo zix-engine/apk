@@ -12,10 +12,19 @@
     android:foreground="?attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingStart="18dp"
-    android:paddingTop="16dp"
-    android:paddingEnd="6dp"
-    android:paddingBottom="16dp">
+    android:paddingStart="16dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="2dp"
+    android:paddingBottom="12dp">
+
+    <TextView
+        android:id="@+id/tvDot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:text="●"
+        android:textColor="?attr/zTextDim"
+        android:textSize="16sp" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -29,7 +38,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="@color/text"
+            android:textColor="?attr/zText"
             android:textSize="17sp"
             android:textStyle="bold" />
 
@@ -41,17 +50,34 @@
             android:ellipsize="end"
             android:fontFamily="monospace"
             android:maxLines="1"
-            android:textColor="@color/text_dim"
+            android:textColor="?attr/zTextDim"
             android:textSize="12sp" />
     </LinearLayout>
 
     <TextView
-        android:id="@+id/btnMenu"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:id="@+id/tvPing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:fontFamily="monospace"
+        android:textColor="?attr/zTextDim"
+        android:textSize="11sp" />
+
+    <ImageView
+        android:id="@+id/btnFav"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:gravity="center"
-        android:text="⋮"
-        android:textColor="@color/text_dim"
-        android:textSize="22sp" />
+        android:contentDescription="@string/favorite"
+        android:padding="11dp"
+        android:src="@drawable/ic_star_outline" />
+
+    <ImageView
+        android:id="@+id/btnMenu"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/menu"
+        android:padding="11dp"
+        android:src="@drawable/ic_more" />
 </LinearLayout>
