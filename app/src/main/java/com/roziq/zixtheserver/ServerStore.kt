@@ -41,6 +41,35 @@ class ServerStore(context: Context) {
 
     fun get(id: String): Server? = list().firstOrNull { it.id == id }
 
+    /** Tandai server baru saja dipakai (untuk urutan di daftar). */
+    fun touch(id: String) {
+        get(id)?.let { save(it.copy(lastUsed = System.currentTimeMillis())) }
+    }
+
+    /** Ekspor semua server ke JSON (BERISI password/private key, simpan dengan aman). */
+    fun exportJson(): String {
+        val arr = JSONArray()
+        list().forEach { arr.put(toJson(it)) }
+        return JSONObject().put("app", "ZixTheServer").put("version", 1).put("servers", arr).toString(2)
+    }
+
+    /** Impor server dari JSON hasil ekspor. Server dengan id sama ditimpa. Mengembalikan jumlah yang masuk. */
+    fun importJson(raw: String): Int = synchronized(LOCK) {
+        val root = JSONObject(raw)
+        val arr = root.getJSONArray("servers")
+        val all = list().toMutableList()
+        var count = 0
+        for (i in 0 until arr.length()) {
+            val s = fromJson(arr.getJSONObject(i))
+            if (s.host.isBlank()) continue
+            val idx = all.indexOfFirst { it.id == s.id }
+            if (idx >= 0) all[idx] = s else all.add(s)
+            count++
+        }
+        write(all)
+        count
+    }
+
     fun save(server: Server) = synchronized(LOCK) {
         val all = list().toMutableList()
         val i = all.indexOfFirst { it.id == server.id }
@@ -67,6 +96,8 @@ class ServerStore(context: Context) {
         put("password", s.password)
         put("privateKey", s.privateKey)
         put("hostKey", s.hostKey)
+        put("favorite", s.favorite)
+        put("lastUsed", s.lastUsed)
     }
 
     private fun fromJson(o: JSONObject) = Server(
@@ -77,7 +108,9 @@ class ServerStore(context: Context) {
         username = o.optString("username", "root"),
         password = o.optString("password"),
         privateKey = o.optString("privateKey"),
-        hostKey = o.optString("hostKey")
+        hostKey = o.optString("hostKey"),
+        favorite = o.optBoolean("favorite", false),
+        lastUsed = o.optLong("lastUsed", 0L)
     )
 
     companion object {

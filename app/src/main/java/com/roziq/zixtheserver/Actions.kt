@@ -90,6 +90,50 @@ object Actions {
                     "Langkah upgrade resmi (maintenance mode, unduh rilis terbaru, composer, migrate). BACKUP database dan .env dulu.",
                     "cd /var/www/pterodactyl && php artisan down && curl -L https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz | tar -xzv && chmod -R 755 storage/* bootstrap/cache && composer install --no-dev --optimize-autoloader && php artisan view:clear && php artisan config:clear && php artisan migrate --seed --force && chown -R www-data:www-data /var/www/pterodactyl/* && php artisan queue:restart && php artisan up",
                     confirm = true
+                ),
+                Action(
+                    "Versi & info Panel",
+                    "Menampilkan versi Panel dan konfigurasi lingkungannya.",
+                    "cd /var/www/pterodactyl && php artisan p:info"
+                ),
+                Action(
+                    "Maintenance Panel ON",
+                    "Mengaktifkan mode maintenance (Panel tidak bisa diakses user).",
+                    "cd /var/www/pterodactyl && php artisan down",
+                    confirm = true
+                ),
+                Action(
+                    "Maintenance Panel OFF",
+                    "Mengembalikan Panel ke mode normal.",
+                    "cd /var/www/pterodactyl && php artisan up"
+                ),
+                Action(
+                    "Perbaiki permission Panel",
+                    "chown www-data + chmod storage dan cache.",
+                    "cd /var/www/pterodactyl && chmod -R 755 storage/* bootstrap/cache && chown -R www-data:www-data /var/www/pterodactyl/*",
+                    confirm = true
+                ),
+                Action(
+                    "Log Wings live",
+                    "Mengikuti log Wings secara langsung. Tekan Ctrl+C untuk berhenti.",
+                    "journalctl -u wings -f"
+                ),
+                Action(
+                    "Edit config Wings",
+                    "Membuka /etc/pterodactyl/config.yml di nano.",
+                    "nano /etc/pterodactyl/config.yml"
+                ),
+                Action(
+                    "Backup Panel (.env + storage)",
+                    "Arsip .env dan storage ke /root/backup.",
+                    "mkdir -p /root/backup && cd /var/www/pterodactyl && tar -czf /root/backup/panel-files-$(date +%F).tar.gz .env storage && ls -lh /root/backup",
+                    confirm = true
+                ),
+                Action(
+                    "Backup database Panel",
+                    "mysqldump database 'panel' ke /root/backup (butuh akses root MariaDB).",
+                    "mkdir -p /root/backup && mysqldump panel > /root/backup/panel-db-$(date +%F).sql && ls -lh /root/backup",
+                    confirm = true
                 )
             )
         ),
@@ -98,6 +142,16 @@ object Actions {
                 Action("Daftar container", "docker ps -a", "docker ps -a"),
                 Action("Pemakaian resource container", "docker stats sekali jalan.", "docker stats --no-stream"),
                 Action("Daftar image", "docker images", "docker images"),
+                Action("Container berjalan", "docker ps", "docker ps"),
+                Action("Pemakaian disk Docker", "docker system df", "docker system df"),
+                Action("Daftar volume", "docker volume ls", "docker volume ls"),
+                Action("Restart Docker", "systemctl restart docker (container bisa terputus sebentar).", "systemctl restart docker && systemctl status docker --no-pager", confirm = true),
+                Action(
+                    "Install Docker Compose",
+                    "Memasang plugin docker compose.",
+                    "apt-get install -y docker-compose-plugin && docker compose version",
+                    confirm = true
+                ),
                 Action(
                     "Bersihkan Docker",
                     "docker system prune -f: hapus container berhenti, network & image dangling.",
@@ -159,6 +213,49 @@ object Actions {
                     "passwd"
                 ),
                 Action(
+                    "Info sistem lengkap",
+                    "Kernel, CPU, RAM, disk, dan perangkat blok.",
+                    "uname -a; echo; lscpu | head -20; echo; free -h; echo; lsblk"
+                ),
+                Action(
+                    "Folder terbesar",
+                    "15 folder terbesar di /.",
+                    "du -xh / --max-depth=1 2>/dev/null | sort -rh | head -15"
+                ),
+                Action(
+                    "Layanan yang gagal",
+                    "systemctl --failed",
+                    "systemctl --failed --no-pager"
+                ),
+                Action(
+                    "Layanan yang berjalan",
+                    "Daftar service berstatus running.",
+                    "systemctl list-units --type=service --state=running --no-pager"
+                ),
+                Action(
+                    "Cron job",
+                    "Crontab user ini dan /etc/cron.d.",
+                    "crontab -l; echo; ls -la /etc/cron.d"
+                ),
+                Action(
+                    "Bersihkan paket & cache apt",
+                    "autoremove dan clean.",
+                    "apt-get autoremove -y && apt-get clean",
+                    confirm = true
+                ),
+                Action(
+                    "Bersihkan log journal",
+                    "Hapus log journal yang lebih dari 3 hari.",
+                    "journalctl --vacuum-time=3d",
+                    confirm = true
+                ),
+                Action(
+                    "Set zona waktu WIB",
+                    "timedatectl set-timezone Asia/Jakarta.",
+                    "timedatectl set-timezone Asia/Jakarta && timedatectl",
+                    confirm = true
+                ),
+                Action(
                     "Reboot server",
                     "Server restart; sesi SSH akan terputus.",
                     "reboot",
@@ -168,6 +265,107 @@ object Actions {
                     "Matikan server",
                     "shutdown -h now. Server harus dinyalakan lagi dari panel penyedia VPS.",
                     "shutdown -h now",
+                    confirm = true
+                )
+            )
+        ),
+        Section(
+            "Jaringan", listOf(
+                Action("IP publik", "Menampilkan IP publik server.", "curl -s ifconfig.me; echo"),
+                Action("Tes ping", "Ping 4x ke 8.8.8.8 dan google.com.", "ping -c 4 8.8.8.8; ping -c 4 google.com"),
+                Action("Koneksi aktif", "30 koneksi TCP yang established.", "ss -tn state established | head -30"),
+                Action("Traffic interface", "Statistik paket per interface.", "ip -s link"),
+                Action("DNS server", "Isi /etc/resolv.conf.", "cat /etc/resolv.conf"),
+                Action(
+                    "Speedtest",
+                    "Tes kecepatan memakai speedtest-cli (butuh python3).",
+                    "curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 -",
+                    confirm = true
+                ),
+                Action("Status UFW", "ufw status verbose", "ufw status verbose"),
+                Action(
+                    "Buka port UFW",
+                    "Interaktif: ketik port, mis. 25565/tcp.",
+                    "read -p 'Port (mis. 25565/tcp): ' P && ufw allow \$P && ufw status",
+                    confirm = true
+                ),
+                Action(
+                    "Tutup port UFW",
+                    "Interaktif: ketik port yang ingin ditutup.",
+                    "read -p 'Port yang ditutup (mis. 25565/tcp): ' P && ufw delete allow \$P && ufw status",
+                    confirm = true
+                )
+            )
+        ),
+        Section(
+            "Database", listOf(
+                Action(
+                    "Install MariaDB",
+                    "Memasang MariaDB server dan mengaktifkannya saat boot.",
+                    "apt-get install -y mariadb-server && systemctl enable --now mariadb",
+                    confirm = true
+                ),
+                Action("Status MariaDB", "Status layanan database.", "systemctl status mariadb --no-pager"),
+                Action("Daftar database", "SHOW DATABASES (akses root lokal).", "mysql -e 'SHOW DATABASES;'"),
+                Action("Shell MySQL", "Membuka konsol mysql sebagai root.", "mysql -u root"),
+                Action(
+                    "Backup semua database",
+                    "mysqldump --all-databases ke /root/backup.",
+                    "mkdir -p /root/backup && mysqldump --all-databases > /root/backup/all-db-$(date +%F).sql && ls -lh /root/backup",
+                    confirm = true
+                )
+            )
+        ),
+        Section(
+            "Dev & Game", listOf(
+                Action(
+                    "Install Node.js 20",
+                    "Memasang Node.js 20 LTS dari NodeSource.",
+                    "curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs && node -v && npm -v",
+                    confirm = true
+                ),
+                Action(
+                    "Install PM2",
+                    "Process manager Node.js, aktif saat boot.",
+                    "npm install -g pm2 && pm2 startup",
+                    confirm = true
+                ),
+                Action("Daftar proses PM2", "pm2 list", "pm2 list"),
+                Action(
+                    "Install Java 21",
+                    "OpenJDK 21 headless (server Minecraft modern).",
+                    "apt-get install -y openjdk-21-jre-headless && java -version",
+                    confirm = true
+                ),
+                Action(
+                    "Install Git, Python, Screen",
+                    "git, python3, python3-pip, screen.",
+                    "apt-get install -y git python3 python3-pip screen",
+                    confirm = true
+                ),
+                Action("Sesi screen", "Daftar sesi screen yang berjalan.", "screen -ls")
+            )
+        ),
+        Section(
+            "Keamanan", listOf(
+                Action("Status Fail2ban", "Ringkasan jail sshd.", "fail2ban-client status sshd"),
+                Action("Login terakhir", "15 login terakhir ke server.", "last -n 15"),
+                Action("User yang sedang login", "Perintah w.", "w"),
+                Action(
+                    "Login SSH gagal",
+                    "20 percobaan login gagal terakhir.",
+                    "grep -i 'failed password' /var/log/auth.log | tail -20 || journalctl -u ssh -n 30 --no-pager"
+                ),
+                Action(
+                    "Tambah user sudo",
+                    "Interaktif: membuat user baru dan menambahkannya ke grup sudo.",
+                    "read -p 'Username baru: ' U && adduser \$U && usermod -aG sudo \$U",
+                    confirm = true
+                ),
+                Action(
+                    "Update otomatis keamanan",
+                    "Memasang unattended-upgrades.",
+                    "apt-get install -y unattended-upgrades && dpkg-reconfigure -plow unattended-upgrades",
                     confirm = true
                 )
             )
@@ -184,6 +382,15 @@ object Actions {
                     "Tes & reload nginx",
                     "nginx -t lalu reload bila konfigurasi valid.",
                     "nginx -t && systemctl reload nginx"
+                ),
+                Action("Log error nginx", "100 baris terakhir error.log.", "tail -n 100 /var/log/nginx/error.log"),
+                Action("Daftar site nginx", "Isi sites-enabled.", "ls -la /etc/nginx/sites-enabled/"),
+                Action("Tes perpanjang SSL", "certbot renew --dry-run.", "certbot renew --dry-run"),
+                Action(
+                    "Install nginx",
+                    "Memasang nginx dan mengaktifkannya.",
+                    "apt-get install -y nginx && systemctl enable --now nginx",
+                    confirm = true
                 ),
                 Action(
                     "Daftar sertifikat SSL",

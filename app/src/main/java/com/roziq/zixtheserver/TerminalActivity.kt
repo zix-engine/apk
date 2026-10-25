@@ -11,11 +11,12 @@ import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -28,7 +29,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
 
-class TerminalActivity : AppCompatActivity() {
+class TerminalActivity : BaseActivity() {
 
     private lateinit var b: ActivityTerminalBinding
     private lateinit var store: ServerStore
@@ -49,10 +50,20 @@ class TerminalActivity : AppCompatActivity() {
         "Enter" to "\n",
         "Ctrl+C" to "\u0003",
         "Ctrl+D" to "\u0004",
+        "Ctrl+Z" to "\u001a",
+        "Ctrl+L" to "\u000c",
         "Tab" to "\t",
         "↑" to "\u001b[A",
         "↓" to "\u001b[B",
+        "←" to "\u001b[D",
+        "→" to "\u001b[C",
         "Esc" to "\u001b",
+        "Home" to "\u001b[H",
+        "End" to "\u001b[F",
+        "|" to "|",
+        "/" to "/",
+        "-" to "-",
+        "~" to "~",
         "y" to "y\n",
         "n" to "n\n",
         "sudo -i" to "sudo -i\n",
@@ -71,10 +82,15 @@ class TerminalActivity : AppCompatActivity() {
 
         b = ActivityTerminalBinding.inflate(layoutInflater)
         setContentView(b.root)
-        setStatus(getString(R.string.term_connecting, server.name), R.color.text_dim)
+        if (prefs.keepScreen) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        applyFont()
+        setStatus(getString(R.string.term_connecting, server.name), R.attr.zTextDim)
 
         buildKeys()
-        b.btnSend.setOnClickListener { sendInput() }
+        b.btnSend.setOnClickListener {
+            haptic(it)
+            sendInput()
+        }
         b.etInput.setOnEditorActionListener { _, actionId, event ->
             val enter = event != null &&
                 event.keyCode == KeyEvent.KEYCODE_ENTER &&
@@ -87,12 +103,22 @@ class TerminalActivity : AppCompatActivity() {
             }
         }
         b.btnSecret.alpha = 0.5f
-        b.btnSecret.setOnClickListener { toggleSecret() }
+        b.btnSecret.setOnClickListener {
+            haptic(it)
+            toggleSecret()
+        }
         b.btnClear.setOnClickListener {
             term.clear()
             render()
         }
         b.btnCopy.setOnClickListener { copyOutput() }
+        b.btnMore.setOnClickListener { showMore(it) }
+        b.btnReconnect.setOnClickListener { reconnect() }
+        b.btnBottom.setOnClickListener {
+            haptic(it)
+            scrollToBottom()
+        }
+        b.scroll.viewTreeObserver.addOnScrollChangedListener { updateBottomButton() }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -112,7 +138,9 @@ class TerminalActivity : AppCompatActivity() {
         connect(intent.getStringExtra(EXTRA_COMMAND))
     }
 
-    private fun onUi(block: () -> Unit) = runOnUiThread { if (!isDestroyed) block() }
+    private fun applyFont() {
+        b.tvOut.textSize = prefs.termFont.toFloat()
+    }
 
     private fun connect(initialCommand: String?) {
         val current = server
@@ -130,9 +158,10 @@ class TerminalActivity : AppCompatActivity() {
                 channel = ch
 
                 onUi {
+                    b.btnReconnect.visibility = View.GONE
                     setStatus(
                         getString(R.string.term_connected, current.username, current.host),
-                        R.color.ok
+                        R.attr.zOk
                     )
                     startKeepAlive()
                 }
@@ -147,15 +176,44 @@ class TerminalActivity : AppCompatActivity() {
                     scheduleRender()
                 }
                 if (!closing) {
-                    onUi { setStatus(getString(R.string.term_closed), R.color.bad) }
+                    shellOut = null
+                    onUi {
+                        setStatus(getString(R.string.term_closed), R.attr.zBad)
+                        b.btnReconnect.visibility = View.VISIBLE
+                    }
                 }
             } catch (e: Exception) {
                 val msg = Ssh.friendlyError(e)
                 term.feed("\n[Gagal: $msg]\n")
                 scheduleRender()
-                onUi { setStatus(msg, R.color.bad) }
+                shellOut = null
+                onUi {
+                    setStatus(msg, R.attr.zBad)
+                    b.btnReconnect.visibility = View.VISIBLE
+                }
             }
         }
+    }
+
+    private fun reconnect() {
+        if (channel?.isConnected == true) return
+        val oldCh = channel
+        val oldSession = session
+        channel = null
+        session = null
+        shellOut = null
+        thread(name = "ssh-close-old") {
+            try {
+                oldCh?.disconnect()
+                oldSession?.disconnect()
+            } catch (_: Exception) {
+            }
+        }
+        b.btnReconnect.visibility = View.GONE
+        term.feed("\n[Menyambung ulang…]\n")
+        render()
+        setStatus(getString(R.string.term_connecting, server.name), R.attr.zTextDim)
+        connect(null)
     }
 
     private fun scheduleRender() {
@@ -177,9 +235,21 @@ class TerminalActivity : AppCompatActivity() {
         }
     }
 
-    private fun setStatus(text: String, colorRes: Int) {
+    private fun scrollToBottom() {
+        val sv = b.scroll
+        sv.post { sv.smoothScrollTo(0, sv.getChildAt(0)?.height ?: 0) }
+    }
+
+    private fun updateBottomButton() {
+        val sv = b.scroll
+        val child = sv.getChildAt(0) ?: return
+        val far = child.bottom - (sv.height + sv.scrollY) > 600
+        b.btnBottom.visibility = if (far) View.VISIBLE else View.GONE
+    }
+
+    private fun setStatus(text: String, colorAttr: Int) {
         b.tvConn.text = text
-        b.tvConn.setTextColor(ContextCompat.getColor(this, colorRes))
+        b.tvConn.setTextColor(zColor(colorAttr))
     }
 
     private fun send(text: String) {
@@ -208,6 +278,8 @@ class TerminalActivity : AppCompatActivity() {
     private fun sendInput() {
         val text = b.etInput.text.toString()
         b.etInput.setText("")
+        // Input rahasia (password) tidak pernah masuk riwayat.
+        if (!secretMode && text.length >= 2) prefs.addHistory(text)
         send(text + "\n")
         if (secretMode) toggleSecret()
     }
@@ -229,6 +301,61 @@ class TerminalActivity : AppCompatActivity() {
         Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
     }
 
+    private fun showMore(anchor: View) {
+        val popup = PopupMenu(this, anchor)
+        popup.menu.add(0, 1, 0, getString(R.string.term_history))
+        popup.menu.add(0, 2, 1, getString(R.string.term_share))
+        popup.menu.add(0, 3, 2, getString(R.string.term_font_up))
+        popup.menu.add(0, 4, 3, getString(R.string.term_font_down))
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                1 -> showHistory()
+                2 -> shareOutput()
+                3 -> {
+                    prefs.termFont = prefs.termFont + 1
+                    applyFont()
+                }
+                4 -> {
+                    prefs.termFont = prefs.termFont - 1
+                    applyFont()
+                }
+            }
+            true
+        }
+        popup.show()
+    }
+
+    private fun showHistory() {
+        val list = prefs.history()
+        if (list.isEmpty()) {
+            toast(R.string.history_empty)
+            return
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.term_history)
+            .setItems(list.toTypedArray()) { _, which ->
+                b.etInput.setText(list[which])
+                b.etInput.setSelection(b.etInput.text.length)
+                b.etInput.requestFocus()
+            }
+            .setNeutralButton(R.string.history_clear) { _, _ -> prefs.clearHistory() }
+            .setNegativeButton(R.string.close, null)
+            .show()
+    }
+
+    private fun shareOutput() {
+        val text = term.text()
+        if (text.isBlank()) {
+            toast(R.string.output_empty)
+            return
+        }
+        val send = Intent(Intent.ACTION_SEND)
+            .setType("text/plain")
+            .putExtra(Intent.EXTRA_SUBJECT, server.name)
+            .putExtra(Intent.EXTRA_TEXT, text)
+        startActivity(Intent.createChooser(send, getString(R.string.term_share)))
+    }
+
     private fun buildKeys() {
         for ((label, sequence) in keys) {
             val btn = MaterialButton(
@@ -241,7 +368,10 @@ class TerminalActivity : AppCompatActivity() {
             btn.minimumWidth = 0
             btn.insetTop = 0
             btn.insetBottom = 0
-            btn.setOnClickListener { send(sequence) }
+            btn.setOnClickListener {
+                haptic(it)
+                send(sequence)
+            }
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(36))
             lp.marginEnd = dp(6)
             b.keys.addView(btn, lp)

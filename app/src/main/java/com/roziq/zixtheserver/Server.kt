@@ -11,5 +11,8 @@ data class Server(
     val password: String = "",
     val privateKey: String = "",
     /** Fingerprint host yang dipercaya saat koneksi pertama (TOFU). */
-    val hostKey: String = ""
+    val hostKey: String = "",
+    val favorite: Boolean = false,
+    /** Waktu terakhir server dibuka (epoch ms), untuk pengurutan. */
+    val lastUsed: Long = 0L
 )
