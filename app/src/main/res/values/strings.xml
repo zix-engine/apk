@@ -2,19 +2,43 @@
 <resources>
     <string name="app_name">ZixTheServer</string>
     <string name="tagline">Kontrol server &amp; Pterodactyl dari HP</string>
-    <string name="add_server">Tambah server</string>
-    <string name="empty_servers">Belum ada server.\nKetuk “Tambah server” untuk mulai.</string>
+    <string name="version_fmt">Versi %1$s</string>
 
-    <string name="menu_edit">Edit</string>
-    <string name="menu_reset_hostkey">Reset host key</string>
-    <string name="menu_delete">Hapus</string>
-    <string name="hostkey_reset_done">Host key direset. Akan dipercaya ulang saat koneksi berikutnya.</string>
-    <string name="confirm_delete">Hapus server “%1$s” dari aplikasi?</string>
+    <!-- Umum -->
     <string name="cancel">Batal</string>
     <string name="save">Simpan</string>
     <string name="run">Jalankan</string>
     <string name="close">Tutup</string>
+    <string name="back">Kembali</string>
+    <string name="menu">Menu</string>
+    <string name="later">Nanti</string>
+    <string name="continue_">Lanjut</string>
     <string name="required">Wajib diisi</string>
+    <string name="copied">Tersalin</string>
+    <string name="settings">Pengaturan</string>
+    <string name="favorite">Favorit</string>
+    <string name="open_settings">Buka pengaturan</string>
+
+    <!-- Splash -->
+    <string name="splash_step1">Menyiapkan enkripsi…</string>
+    <string name="splash_step2">Memuat daftar server…</string>
+    <string name="splash_step3">Menyiapkan antarmuka…</string>
+    <string name="splash_step4">Siap!</string>
+
+    <!-- Daftar server -->
+    <string name="add_server">Tambah server</string>
+    <string name="search_server">Cari server…</string>
+    <string name="empty_servers">Belum ada server.\nKetuk “Tambah server” untuk mulai.</string>
+    <string name="no_results">Tidak ada server yang cocok.</string>
+    <string name="summary_fmt">%1$d server • %2$d online</string>
+    <string name="menu_edit">Edit</string>
+    <string name="menu_duplicate">Duplikat</string>
+    <string name="menu_copy_ssh">Salin perintah SSH</string>
+    <string name="menu_reset_hostkey">Reset host key</string>
+    <string name="menu_delete">Hapus</string>
+    <string name="copy_suffix"> (salinan)</string>
+    <string name="hostkey_reset_done">Host key direset. Akan dipercaya ulang saat koneksi berikutnya.</string>
+    <string name="confirm_delete">Hapus server “%1$s” dari aplikasi?</string>
 
     <string name="hint_name">Nama server</string>
     <string name="hint_host">Host / IP</string>
@@ -23,16 +47,33 @@
     <string name="hint_pass">Password (atau passphrase key)</string>
     <string name="hint_key">Private key (opsional, format PEM)</string>
 
+    <!-- Dashboard -->
     <string name="terminal">Terminal</string>
     <string name="refresh">Refresh</string>
+    <string name="auto_off">Auto: mati</string>
+    <string name="auto_on">Auto: %1$d dtk</string>
     <string name="connecting">Menghubungkan…</string>
+    <string name="connected_online">● Online — %1$s (%2$s)</string>
     <string name="no_services">Belum ada layanan terdeteksi (nginx, docker, wings, dll. belum terpasang).</string>
     <string name="warn_not_root">Login bukan root. Aksi instalasi butuh hak root: gunakan user root, atau jalankan sudo -i di Terminal.</string>
     <string name="confirm_run">%1$s\n\nPerintah yang akan dijalankan:\n\n%2$s\n\nLanjutkan?</string>
+    <string name="search_action">Cari aksi cepat…</string>
+    <string name="sec_favorites">★ Favorit</string>
+    <string name="sec_mine">Perintahku</string>
+    <string name="snippet_add">+ Tambah perintah sendiri</string>
+    <string name="snippet_add_desc">Simpan perintah favoritmu agar bisa dijalankan sekali ketuk.</string>
+    <string name="snippet_title">Judul</string>
+    <string name="snippet_command">Perintah (shell)</string>
+    <string name="fav_add">Tambah ke favorit</string>
+    <string name="fav_remove">Hapus dari favorit</string>
+    <string name="copy_command">Salin perintah</string>
+    <string name="view_command">Lihat perintah</string>
 
+    <!-- Terminal -->
     <string name="term_connecting">%1$s — menghubungkan…</string>
     <string name="term_connected">Terhubung: %1$s@%2$s</string>
     <string name="term_closed">Sesi ditutup oleh server</string>
+    <string name="reconnect">Sambung ulang</string>
     <string name="clear">Clear</string>
     <string name="copy">Salin</string>
     <string name="send">Kirim</string>
@@ -40,10 +81,69 @@
     <string name="secret_toggle">•••</string>
     <string name="not_connected">Belum terhubung ke server</string>
     <string name="send_failed">Gagal mengirim: %1$s</string>
-    <string name="copied">Output disalin</string>
     <string name="close_session">Tutup sesi?</string>
     <string name="close_session_msg">Proses yang sedang berjalan di server (mis. instalasi) akan ikut dihentikan.</string>
+    <string name="term_history">Riwayat perintah</string>
+    <string name="term_share">Bagikan output</string>
+    <string name="term_font_up">Perbesar font</string>
+    <string name="term_font_down">Perkecil font</string>
+    <string name="history_empty">Belum ada riwayat perintah.</string>
+    <string name="history_clear">Hapus riwayat</string>
+    <string name="history_cleared">Riwayat dihapus</string>
+    <string name="output_empty">Output masih kosong.</string>
 
     <string name="notif_channel">Sesi SSH</string>
     <string name="notif_active">Sesi SSH aktif</string>
+
+    <!-- Pengaturan -->
+    <string name="set_appearance">Tampilan</string>
+    <string name="set_splash">Animasi loading</string>
+    <string name="set_splash_desc">Tampilkan animasi saat aplikasi dibuka.</string>
+    <string name="set_haptics">Getar halus</string>
+    <string name="set_haptics_desc">Umpan balik getar saat menekan tombol.</string>
+    <string name="set_terminal">Terminal</string>
+    <string name="set_font">Ukuran font terminal</string>
+    <string name="set_font_value">%1$d sp</string>
+    <string name="set_keep_screen">Layar tetap menyala</string>
+    <string name="set_keep_screen_desc">Cegah layar mati selama terminal terbuka.</string>
+    <string name="set_clear_history">Hapus riwayat perintah</string>
+    <string name="set_clear_history_desc">Menghapus daftar perintah yang pernah diketik.</string>
+    <string name="set_dashboard">Dashboard</string>
+    <string name="set_auto_refresh">Auto-refresh statistik</string>
+    <string name="set_auto_refresh_desc">Perbarui CPU/RAM/disk secara berkala.</string>
+    <string name="set_interval">Interval auto-refresh</string>
+    <string name="set_interval_value">Setiap %1$d detik</string>
+    <string name="set_data">Data</string>
+    <string name="set_backup">Backup daftar server</string>
+    <string name="set_backup_desc">Simpan semua server ke file JSON.</string>
+    <string name="set_restore">Restore daftar server</string>
+    <string name="set_restore_desc">Impor server dari file backup.</string>
+    <string name="backup_warning">File backup berisi password dan private key dalam bentuk teks biasa. Simpan di tempat yang aman dan jangan dibagikan.</string>
+    <string name="backup_done">Backup tersimpan</string>
+    <string name="backup_failed">Backup gagal: %1$s</string>
+    <string name="restore_done">%1$d server diimpor</string>
+    <string name="restore_failed">Restore gagal: %1$s</string>
+    <string name="set_update">Pembaruan</string>
+    <string name="set_auto_update">Cek update otomatis</string>
+    <string name="set_auto_update_desc">Cek rilis baru di GitHub saat aplikasi dibuka.</string>
+    <string name="set_repo">Repo GitHub</string>
+    <string name="set_repo_unset">Belum diatur — ketuk untuk mengisi (pemilik/nama-repo)</string>
+    <string name="set_repo_help">Format: pemilik/nama-repo. Kosongkan untuk memakai bawaan build (%1$s). Repo harus publik.</string>
+    <string name="set_check_now">Cek update sekarang</string>
+    <string name="set_check_now_desc">Versi terpasang: %1$s</string>
+    <string name="set_about">Tentang</string>
+
+    <!-- Update -->
+    <string name="update_title">Memperbarui</string>
+    <string name="update_checking">Mengecek update…</string>
+    <string name="update_latest">Sudah versi terbaru (%1$s)</string>
+    <string name="update_failed">Update gagal: %1$s</string>
+    <string name="update_no_repo">Repo GitHub belum diatur. Isi di Pengaturan › Pembaruan.</string>
+    <string name="update_available">Update %1$s tersedia</string>
+    <string name="update_message">Terpasang: %1$s\nTerbaru: %2$s%3$s</string>
+    <string name="update_now">Update sekarang</string>
+    <string name="update_downloading">Mengunduh…</string>
+    <string name="update_progress">Mengunduh… %1$d%%</string>
+    <string name="update_permission_title">Izin pasang aplikasi</string>
+    <string name="update_permission_msg">Izinkan ZixTheServer memasang aplikasi dari sumber ini, lalu kembali dan ketuk update lagi.</string>
 </resources>

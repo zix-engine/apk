@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg">#0A0E1A</color>
-    <color name="surface">#121829</color>
-    <color name="surface2">#1A2238</color>
-    <color name="stroke">#26304A</color>
-    <color name="text">#E6EBF5</color>
-    <color name="text_dim">#8D97AD</color>
-    <color name="accent">#22D3EE</color>
-    <color name="on_accent">#00262D</color>
-    <color name="ok">#34D399</color>
-    <color name="bad">#F87171</color>
-    <color name="term_bg">#05070D</color>
-    <color name="term_fg">#D6DEEB</color>
+    <color name="splash_bg">#0A0E1A</color>
+    <color name="ic_bg_top">#0F172A</color>
+    <color name="ic_bg_bottom">#1E1B4B</color>
 </resources>

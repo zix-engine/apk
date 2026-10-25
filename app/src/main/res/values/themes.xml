@@ -1,22 +1,172 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.ZixTheServer" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/accent</item>
-        <item name="colorOnPrimary">@color/on_accent</item>
-        <item name="colorPrimaryContainer">@color/surface2</item>
-        <item name="colorOnPrimaryContainer">@color/accent</item>
-        <item name="colorSurface">@color/surface</item>
-        <item name="colorOnSurface">@color/text</item>
-        <item name="colorSurfaceVariant">@color/surface2</item>
-        <item name="colorOnSurfaceVariant">@color/text_dim</item>
-        <item name="colorSurfaceContainer">@color/surface</item>
-        <item name="colorSurfaceContainerHigh">@color/surface2</item>
-        <item name="colorSurfaceContainerHighest">@color/surface2</item>
-        <item name="colorOutline">@color/stroke</item>
-        <item name="android:windowBackground">@color/bg</item>
-        <item name="android:statusBarColor">@color/bg</item>
-        <item name="android:navigationBarColor">@color/bg</item>
-        <item name="android:textColorPrimary">@color/text</item>
-        <item name="android:textColorSecondary">@color/text_dim</item>
+    <style name="ZixWindowAnim" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/open_enter</item>
+        <item name="android:activityOpenExitAnimation">@anim/open_exit</item>
+        <item name="android:activityCloseEnterAnimation">@anim/close_enter</item>
+        <item name="android:activityCloseExitAnimation">@anim/close_exit</item>
+    </style>
+
+    <style name="Theme.Zix.Base.Dark" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">?attr/zAccent</item>
+        <item name="colorOnPrimary">?attr/zOnAccent</item>
+        <item name="colorPrimaryContainer">?attr/zSurface2</item>
+        <item name="colorOnPrimaryContainer">?attr/zAccent</item>
+        <item name="colorSecondary">?attr/zAccent</item>
+        <item name="colorSurface">?attr/zSurface</item>
+        <item name="colorOnSurface">?attr/zText</item>
+        <item name="colorSurfaceVariant">?attr/zSurface2</item>
+        <item name="colorOnSurfaceVariant">?attr/zTextDim</item>
+        <item name="colorSurfaceContainer">?attr/zSurface</item>
+        <item name="colorSurfaceContainerHigh">?attr/zSurface2</item>
+        <item name="colorSurfaceContainerHighest">?attr/zSurface2</item>
+        <item name="colorOutline">?attr/zStroke</item>
+        <item name="colorError">?attr/zBad</item>
+        <item name="android:windowBackground">?attr/zBg</item>
+        <item name="android:statusBarColor">?attr/zBg</item>
+        <item name="android:navigationBarColor">?attr/zBg</item>
+        <item name="android:textColorPrimary">?attr/zText</item>
+        <item name="android:textColorSecondary">?attr/zTextDim</item>
+        <item name="android:windowAnimationStyle">@style/ZixWindowAnim</item>
+    </style>
+
+    <style name="Theme.Zix.Base.Light" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">?attr/zAccent</item>
+        <item name="colorOnPrimary">?attr/zOnAccent</item>
+        <item name="colorPrimaryContainer">?attr/zSurface2</item>
+        <item name="colorOnPrimaryContainer">?attr/zAccent</item>
+        <item name="colorSecondary">?attr/zAccent</item>
+        <item name="colorSurface">?attr/zSurface</item>
+        <item name="colorOnSurface">?attr/zText</item>
+        <item name="colorSurfaceVariant">?attr/zSurface2</item>
+        <item name="colorOnSurfaceVariant">?attr/zTextDim</item>
+        <item name="colorSurfaceContainer">?attr/zSurface</item>
+        <item name="colorSurfaceContainerHigh">?attr/zSurface2</item>
+        <item name="colorSurfaceContainerHighest">?attr/zSurface2</item>
+        <item name="colorOutline">?attr/zStroke</item>
+        <item name="colorError">?attr/zBad</item>
+        <item name="android:windowBackground">?attr/zBg</item>
+        <item name="android:statusBarColor">?attr/zBg</item>
+        <item name="android:navigationBarColor">?attr/zBg</item>
+        <item name="android:textColorPrimary">?attr/zText</item>
+        <item name="android:textColorSecondary">?attr/zTextDim</item>
+        <item name="android:windowAnimationStyle">@style/ZixWindowAnim</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="Theme.Zix.Cyan" parent="Theme.Zix.Base.Dark">
+        <item name="zBg">#0A0E1A</item>
+        <item name="zSurface">#121829</item>
+        <item name="zSurface2">#1A2238</item>
+        <item name="zStroke">#26304A</item>
+        <item name="zText">#E6EBF5</item>
+        <item name="zTextDim">#8D97AD</item>
+        <item name="zAccent">#22D3EE</item>
+        <item name="zOnAccent">#00262D</item>
+        <item name="zOk">#34D399</item>
+        <item name="zBad">#F87171</item>
+        <item name="zWarn">#FBBF24</item>
+        <item name="zTermBg">#05070D</item>
+        <item name="zTermFg">#D6DEEB</item>
+    </style>
+
+    <style name="Theme.Zix.Violet" parent="Theme.Zix.Base.Dark">
+        <item name="zBg">#0D0A1A</item>
+        <item name="zSurface">#17122B</item>
+        <item name="zSurface2">#201A3D</item>
+        <item name="zStroke">#352C5C</item>
+        <item name="zText">#EDE9FE</item>
+        <item name="zTextDim">#9A92BD</item>
+        <item name="zAccent">#A78BFA</item>
+        <item name="zOnAccent">#1E1147</item>
+        <item name="zOk">#34D399</item>
+        <item name="zBad">#F87171</item>
+        <item name="zWarn">#FBBF24</item>
+        <item name="zTermBg">#07050F</item>
+        <item name="zTermFg">#E4DEFA</item>
+    </style>
+
+    <style name="Theme.Zix.Green" parent="Theme.Zix.Base.Dark">
+        <item name="zBg">#050E09</item>
+        <item name="zSurface">#0A1A10</item>
+        <item name="zSurface2">#10261A</item>
+        <item name="zStroke">#1D3D2A</item>
+        <item name="zText">#DDF5E5</item>
+        <item name="zTextDim">#7FA68C</item>
+        <item name="zAccent">#4ADE80</item>
+        <item name="zOnAccent">#032613</item>
+        <item name="zOk">#34D399</item>
+        <item name="zBad">#F87171</item>
+        <item name="zWarn">#FBBF24</item>
+        <item name="zTermBg">#020A05</item>
+        <item name="zTermFg">#BFF5CF</item>
+    </style>
+
+    <style name="Theme.Zix.Orange" parent="Theme.Zix.Base.Dark">
+        <item name="zBg">#140C08</item>
+        <item name="zSurface">#1F130C</item>
+        <item name="zSurface2">#2B1B11</item>
+        <item name="zStroke">#4A2E1C</item>
+        <item name="zText">#FBEBDD</item>
+        <item name="zTextDim">#B39580</item>
+        <item name="zAccent">#FB923C</item>
+        <item name="zOnAccent">#2E1400</item>
+        <item name="zOk">#34D399</item>
+        <item name="zBad">#F87171</item>
+        <item name="zWarn">#FBBF24</item>
+        <item name="zTermBg">#0C0704</item>
+        <item name="zTermFg">#F7DEC9</item>
+    </style>
+
+    <style name="Theme.Zix.Rose" parent="Theme.Zix.Base.Dark">
+        <item name="zBg">#14090E</item>
+        <item name="zSurface">#201118</item>
+        <item name="zSurface2">#2D1822</item>
+        <item name="zStroke">#4D2A3A</item>
+        <item name="zText">#FCE7EE</item>
+        <item name="zTextDim">#B58C9B</item>
+        <item name="zAccent">#FB7185</item>
+        <item name="zOnAccent">#3A0612</item>
+        <item name="zOk">#34D399</item>
+        <item name="zBad">#F87171</item>
+        <item name="zWarn">#FBBF24</item>
+        <item name="zTermBg">#0C050A</item>
+        <item name="zTermFg">#F8D9E2</item>
+    </style>
+
+    <style name="Theme.Zix.Amoled" parent="Theme.Zix.Base.Dark">
+        <item name="zBg">#000000</item>
+        <item name="zSurface">#0C0C0E</item>
+        <item name="zSurface2">#16161A</item>
+        <item name="zStroke">#26262C</item>
+        <item name="zText">#F2F2F5</item>
+        <item name="zTextDim">#8A8A94</item>
+        <item name="zAccent">#38BDF8</item>
+        <item name="zOnAccent">#00243A</item>
+        <item name="zOk">#34D399</item>
+        <item name="zBad">#F87171</item>
+        <item name="zWarn">#FBBF24</item>
+        <item name="zTermBg">#000000</item>
+        <item name="zTermFg">#E4E4EA</item>
+    </style>
+
+    <style name="Theme.Zix.Light" parent="Theme.Zix.Base.Light">
+        <item name="zBg">#F3F6FB</item>
+        <item name="zSurface">#FFFFFF</item>
+        <item name="zSurface2">#E8EDF6</item>
+        <item name="zStroke">#D3DBEA</item>
+        <item name="zText">#0F172A</item>
+        <item name="zTextDim">#5B6577</item>
+        <item name="zAccent">#0891B2</item>
+        <item name="zOnAccent">#FFFFFF</item>
+        <item name="zOk">#059669</item>
+        <item name="zBad">#DC2626</item>
+        <item name="zWarn">#B45309</item>
+        <item name="zTermBg">#FFFFFF</item>
+        <item name="zTermFg">#0F172A</item>
+    </style>
+
+    <style name="Theme.Zix.Splash" parent="Theme.Zix.Cyan">
+        <item name="android:windowBackground">@color/splash_bg</item>
     </style>
 </resources>

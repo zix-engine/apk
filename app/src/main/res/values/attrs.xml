@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="zBg" format="color" />
+    <attr name="zSurface" format="color" />
+    <attr name="zSurface2" format="color" />
+    <attr name="zStroke" format="color" />
+    <attr name="zText" format="color" />
+    <attr name="zTextDim" format="color" />
+    <attr name="zAccent" format="color" />
+    <attr name="zOnAccent" format="color" />
+    <attr name="zOk" format="color" />
+    <attr name="zBad" format="color" />
+    <attr name="zWarn" format="color" />
+    <attr name="zTermBg" format="color" />
+    <attr name="zTermFg" format="color" />
+</resources>
