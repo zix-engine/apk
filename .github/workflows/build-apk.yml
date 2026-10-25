@@ -1,13 +1,20 @@
-name: Build APK
+name: Build & Release APK
 
 on:
   workflow_dispatch:
   push:
     branches: [main, master]
+    paths-ignore:
+      - '**.md'
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      HAS_KEYSTORE: ${{ secrets.ZIX_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,11 +27,40 @@ jobs:
         with:
           gradle-version: 8.7
 
-      - name: Build debug APK
-        run: gradle assembleDebug --no-daemon
+      - name: Hitung versi
+        id: ver
+        run: |
+          BASE=$(grep '^APP_VERSION_BASE=' gradle.properties | cut -d= -f2)
+          echo "name=${BASE}.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Pakai keystore dari Secrets (opsional)
+        if: env.HAS_KEYSTORE == 'true'
+        run: |
+          echo "${{ secrets.ZIX_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/zix.jks"
+          echo "ZIX_KEYSTORE_FILE=$RUNNER_TEMP/zix.jks" >> "$GITHUB_ENV"
+          echo "ZIX_KEYSTORE_PASSWORD=${{ secrets.ZIX_KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "ZIX_KEY_ALIAS=${{ secrets.ZIX_KEY_ALIAS }}" >> "$GITHUB_ENV"
+          echo "ZIX_KEY_PASSWORD=${{ secrets.ZIX_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+
+      - name: Build APK release
+        env:
+          APP_VERSION_NAME: ${{ steps.ver.outputs.name }}
+          APP_VERSION_CODE: ${{ github.run_number }}
+        run: gradle assembleRelease --no-daemon
+
+      - name: Ganti nama APK
+        run: cp app/build/outputs/apk/release/app-release.apk "ZixTheServer-v${{ steps.ver.outputs.name }}.apk"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ZixTheServer-debug
-          path: app/build/outputs/apk/debug/*.apk
+          name: ZixTheServer
+          path: ZixTheServer-v*.apk
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.name }}
+          name: ZixTheServer v${{ steps.ver.outputs.name }}
+          files: ZixTheServer-v*.apk
+          generate_release_notes: true
           
