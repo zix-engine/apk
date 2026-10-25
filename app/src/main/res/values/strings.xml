@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ZixTheServer</string>
+    <string name="tagline">Kontrol server &amp; Pterodactyl dari HP</string>
+    <string name="add_server">Tambah server</string>
+    <string name="empty_servers">Belum ada server.\nKetuk “Tambah server” untuk mulai.</string>
+
+    <string name="menu_edit">Edit</string>
+    <string name="menu_reset_hostkey">Reset host key</string>
+    <string name="menu_delete">Hapus</string>
+    <string name="hostkey_reset_done">Host key direset. Akan dipercaya ulang saat koneksi berikutnya.</string>
+    <string name="confirm_delete">Hapus server “%1$s” dari aplikasi?</string>
+    <string name="cancel">Batal</string>
+    <string name="save">Simpan</string>
+    <string name="run">Jalankan</string>
+    <string name="close">Tutup</string>
+    <string name="required">Wajib diisi</string>
+
+    <string name="hint_name">Nama server</string>
+    <string name="hint_host">Host / IP</string>
+    <string name="hint_port">Port SSH</string>
+    <string name="hint_user">Username</string>
+    <string name="hint_pass">Password (atau passphrase key)</string>
+    <string name="hint_key">Private key (opsional, format PEM)</string>
+
+    <string name="terminal">Terminal</string>
+    <string name="refresh">Refresh</string>
+    <string name="connecting">Menghubungkan…</string>
+    <string name="no_services">Belum ada layanan terdeteksi (nginx, docker, wings, dll. belum terpasang).</string>
+    <string name="warn_not_root">Login bukan root. Aksi instalasi butuh hak root: gunakan user root, atau jalankan sudo -i di Terminal.</string>
+    <string name="confirm_run">%1$s\n\nPerintah yang akan dijalankan:\n\n%2$s\n\nLanjutkan?</string>
+
+    <string name="term_connecting">%1$s — menghubungkan…</string>
+    <string name="term_connected">Terhubung: %1$s@%2$s</string>
+    <string name="term_closed">Sesi ditutup oleh server</string>
+    <string name="clear">Clear</string>
+    <string name="copy">Salin</string>
+    <string name="send">Kirim</string>
+    <string name="input_hint">Ketik perintah / jawaban…</string>
+    <string name="secret_toggle">•••</string>
+    <string name="not_connected">Belum terhubung ke server</string>
+    <string name="send_failed">Gagal mengirim: %1$s</string>
+    <string name="copied">Output disalin</string>
+    <string name="close_session">Tutup sesi?</string>
+    <string name="close_session_msg">Proses yang sedang berjalan di server (mis. instalasi) akan ikut dihentikan.</string>
+
+    <string name="notif_channel">Sesi SSH</string>
+    <string name="notif_active">Sesi SSH aktif</string>
+</resources>
