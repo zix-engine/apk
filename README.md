@@ -1,81 +1,45 @@
 # ZixTheServer
 
 Aplikasi Android (Kotlin) untuk mengontrol server Linux lewat SSH dan memasang
-Pterodactyl (Panel + Wings) langsung dari HP.
+Pterodactyl (Panel + Wings) dari HP.
 
-## Fitur
+## Fitur (v2)
 
-- **Daftar server**: nama, host/IP, port, username, password atau private key.
-  Kredensial disimpan terenkripsi (Android Keystore / EncryptedSharedPreferences).
-- **Dashboard server**: hostname, OS, uptime, load CPU, RAM, disk, dan status
-  layanan (nginx, mariadb/mysql, redis, docker, wings, pteroq).
-- **Aksi cepat** (dijalankan di terminal sehingga semua output terlihat):
-  - Pterodactyl: install Panel/Wings (installer komunitas pterodactyl-installer.se),
-    install Docker, status/restart/log Panel & Wings, buat user admin,
-    bersihkan cache, update Wings, update Panel.
-  - Docker: daftar container/image, stats, prune.
-  - Sistem: update paket, tool dasar, cek resource, port listening, swap 2 GB,
-    firewall UFW untuk Pterodactyl, Fail2ban, ganti password, reboot, shutdown.
-  - Web & SSL: Certbot nginx, tes/reload nginx, daftar sertifikat.
-- **Terminal interaktif** (PTY): ketik perintah/jawaban prompt, tombol cepat
-  (Enter, Ctrl+C, Ctrl+D, Tab, panah, y, n), input rahasia untuk password,
-  salin output.
-- **Sesi terjaga**: foreground service + wake lock selama terminal terbuka,
-  supaya instalasi panjang tidak mati saat layar padam.
-- **Verifikasi host key** (trust-on-first-use): koneksi ditolak jika
-  fingerprint server berubah.
+- **7 tema** (Cyber Cyan, Neon Violet, Matrix Green, Sunset, Rose, AMOLED, Terang), ganti di Pengaturan.
+- **Animasi loading** saat aplikasi dibuka (bisa dimatikan), ikon adaptive baru, transisi antar layar halus.
+- **Daftar server**: cari, favorit, status online + ping, tarik untuk refresh, duplikat, salin perintah SSH.
+- **Dashboard**: gauge CPU/RAM/disk live, auto-refresh, status layanan, jumlah container Docker.
+- **80+ aksi cepat** (Pterodactyl, Docker, Sistem, Jaringan, Database, Dev & Game, Keamanan, Web & SSL):
+  bisa dicari, dilipat per kategori, ditandai favorit (tekan lama), dan **perintah buatan sendiri**.
+- **Terminal**: riwayat perintah, bagikan output, zoom font, sambung ulang, tombol Ctrl/panah/simbol lengkap.
+- **Backup/Restore** daftar server, getar halus, layar tetap menyala.
+- **Update dalam aplikasi** dari GitHub Releases.
 
-## Cara build
+## Deploy & update lewat GitHub
 
-### Opsi 1 - Android Studio
-1. Ekstrak zip, lalu **File > Open** pilih folder `ZixTheServer`.
-2. Tunggu Gradle sync (butuh JDK 17, SDK Platform 34).
-3. **Build > Build APK(s)**. Hasil: `app/build/outputs/apk/debug/app-debug.apk`.
+1. Upload isi folder ini ke repo GitHub **publik**.
+2. Setiap `git push` ke `main`, GitHub Actions otomatis build APK dan membuat **Release** baru
+   (`ZixTheServer-vX.Y.N.apk`).
+3. Di HP: buka aplikasi > muncul dialog update (atau Pengaturan > Cek update sekarang) > Update > Pasang.
+   Repo terisi otomatis dari build; bisa diubah di Pengaturan.
 
-### Opsi 2 - GitHub Actions (tanpa PC)
-1. Upload isi folder ini ke repo GitHub.
-2. Buka tab **Actions > Build APK > Run workflow**.
-3. Unduh artifact `ZixTheServer-debug` berisi APK.
+Naikkan versi besar dengan mengubah `APP_VERSION_BASE` di `gradle.properties`.
 
-### Opsi 3 - Command line
-Wrapper sudah disertakan (Gradle 8.7). Pastikan JDK 17 dan Android SDK
-(`ANDROID_HOME`, platform 34) terpasang, lalu:
+### Tanda tangan (penting)
+APK baru hanya bisa menimpa yang lama bila **tanda tangannya sama**. Bawaan: `app/zix-release.jks`
+ada di repo (praktis, tapi siapa pun yang bisa membaca repo bisa memakai kunci itu). Lebih aman:
+buat keystore sendiri lalu isi GitHub Secrets `ZIX_KEYSTORE_BASE64`, `ZIX_KEYSTORE_PASSWORD`,
+`ZIX_KEY_ALIAS`, `ZIX_KEY_PASSWORD`. Ganti keystore = pengguna harus install ulang sekali.
 
-```
-chmod +x gradlew
-./gradlew assembleDebug
-```
+> Versi 1.x ditandatangani kunci lain, jadi **uninstall v1 sekali** sebelum memasang v2
+> (daftar server v1 ikut terhapus; catat dulu).
 
-> Proyek memakai Android Gradle Plugin 8.5.2 + Kotlin 1.9.24 + ViewBinding,
-> sehingga tidak bisa dibuild di AIDE; gunakan opsi di atas.
+## Build manual
+JDK 17 + Android SDK 34: `gradle assembleRelease` (atau buka di Android Studio).
 
 ## Catatan penting
-
-- Aksi instalasi butuh **root**. Login sebagai root, atau jalankan `sudo -i`
-  di Terminal bila memakai user biasa.
-- `pterodactyl-installer.se` adalah skrip komunitas (bukan resmi dari
-  Pterodactyl). Ia menjalankan menu interaktif; jawab prompt lewat Terminal.
-  Gunakan VPS/OS bersih (Ubuntu 22.04/24.04 atau Debian 11/12).
-- Firewall UFW membuka port SSH server ini, 80, 443, 8080, dan 2022. Port
-  server game harus ditambahkan manual.
-- Update Panel/Wings: **backup database dan `.env` dulu**.
-- Jika Keystore perangkat gagal dipakai, penyimpanan otomatis jatuh ke
-  SharedPreferences biasa (tidak terenkripsi). Pakai private key + passphrase
-  jika khawatir.
-- Setelah server di-install ulang, fingerprint berubah: pilih menu
-  **Reset host key** pada server tersebut.
-
-## Struktur
-
-```
-app/src/main/java/com/roziq/zixtheserver/
-  MainActivity.kt      daftar server + tambah/edit/hapus
-  ServerActivity.kt    dashboard + aksi cepat
-  TerminalActivity.kt  terminal SSH interaktif
-  Actions.kt           katalog perintah aksi cepat (ubah/tambah di sini)
-  Ssh.kt               koneksi JSch + verifikasi host key
-  TerminalBuffer.kt    pembersih ANSI / carriage return
-  ServerStore.kt       penyimpanan terenkripsi
-  KeepAliveService.kt  foreground service + wake lock
-app/src/main/assets/stats.sh   skrip statistik server
-```
+- Aksi instalasi butuh **root** (login root atau `sudo -i`).
+- `pterodactyl-installer.se` adalah skrip komunitas, bukan resmi.
+- Update Panel/Wings: backup database dan `.env` dulu.
+- Setelah server di-install ulang, fingerprint berubah: pakai **Reset host key**.
+- File backup server berisi password/private key polos; simpan aman.
