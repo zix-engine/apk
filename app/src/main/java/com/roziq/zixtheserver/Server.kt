@@ -14,5 +14,16 @@ data class Server(
     val hostKey: String = "",
     val favorite: Boolean = false,
     /** Waktu terakhir server dibuka (epoch ms), untuk pengurutan. */
-    val lastUsed: Long = 0L
+    val lastUsed: Long = 0L,
+    /** URL Panel Pterodactyl (mis. https://panel.contoh.com) dan Client API key (ptlc_...). */
+    val panelUrl: String = "",
+    val panelKey: String = "",
+    /** Nama grup/tag untuk pengelompokan di daftar. */
+    val group: String = "",
+    /** MAC address untuk Wake-on-LAN (opsional). */
+    val mac: String = "",
+    /** ID server lain yang dipakai sebagai jump host (opsional). */
+    val jumpId: String = "",
+    /** Aktifkan alert CPU/RAM/disk/layanan di pemantau latar. */
+    val alerts: Boolean = false
 )

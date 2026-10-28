@@ -19,7 +19,15 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
+import androidx.core.graphics.drawable.toBitmap
+import android.widget.LinearLayout
+import android.widget.TextView
+import kotlin.concurrent.thread
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -41,6 +49,7 @@ class MainActivity : BaseActivity() {
     private var query = ""
     private var all: List<Server> = emptyList()
     private var firstLoad = true
+    private var selectedGroup: String? = null
 
     private val notifPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -52,7 +61,8 @@ class MainActivity : BaseActivity() {
 
         store = ServerStore(this)
         adapter = ServerAdapter(this, ::openServer, ::showMenu, ::toggleFavorite)
-        b.rvServers.layoutManager = LinearLayoutManager(this)
+        val span = if (resources.configuration.screenWidthDp >= 600) 2 else 1
+        b.rvServers.layoutManager = GridLayoutManager(this, span)
         b.rvServers.adapter = adapter
         b.rvServers.layoutAnimation =
             AnimationUtils.loadLayoutAnimation(this, R.anim.layout_fall_down)
@@ -64,6 +74,10 @@ class MainActivity : BaseActivity() {
         b.fabAdd.setOnClickListener {
             haptic(it)
             showEditor(null)
+        }
+        b.btnTools.setOnClickListener {
+            haptic(it)
+            showGlobalTools()
         }
         b.btnSettings.setOnClickListener {
             haptic(it)
@@ -84,6 +98,8 @@ class MainActivity : BaseActivity() {
         ) {
             notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
+
+        if (prefs.monitor) MonitorWorker.schedule(this, true)
 
         val sixHours = 6 * 60 * 60 * 1000L
         if (prefs.autoUpdate && System.currentTimeMillis() - prefs.lastUpdateCheck > sixHours) {
@@ -109,14 +125,119 @@ class MainActivity : BaseActivity() {
                 .thenByDescending { it.lastUsed }
                 .thenBy { it.name.lowercase() }
         )
+        buildGroups()
         applyFilter()
+        updateShortcuts()
+    }
+
+    private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+    private fun buildGroups() {
+        val groups = all.map { it.group }.filter { it.isNotBlank() }.distinct().sorted()
+        if (selectedGroup != null && selectedGroup !in groups) selectedGroup = null
+        b.groupScroll.visibility = if (groups.isEmpty()) View.GONE else View.VISIBLE
+        b.llGroups.removeAllViews()
+        val items = listOf<String?>(null) + groups
+        for (g in items) {
+            val sel = g == selectedGroup
+            val tv = TextView(this)
+            tv.text = g ?: getString(R.string.group_all)
+            tv.textSize = 13f
+            tv.setPadding(dp(14), dp(7), dp(14), dp(7))
+            tv.setBackgroundResource(if (sel) R.drawable.bg_chip_sel else R.drawable.bg_chip)
+            tv.setTextColor(zColor(if (sel) R.attr.zAccent else R.attr.zTextDim))
+            tv.setOnClickListener {
+                selectedGroup = g
+                buildGroups()
+                applyFilter()
+            }
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            lp.marginEnd = dp(8)
+            b.llGroups.addView(tv, lp)
+        }
+    }
+
+    /** Pintasan ikon aplikasi: tahan ikon untuk langsung membuka server favorit. */
+    private fun updateShortcuts() {
+        try {
+            val icon = AppCompatResources.getDrawable(this, R.drawable.ic_launcher)?.toBitmap(192, 192)
+            val list = all.filter { it.favorite }.take(4).map { s ->
+                ShortcutInfoCompat.Builder(this, s.id)
+                    .setShortLabel(s.name.take(20))
+                    .setLongLabel(s.name)
+                    .setIcon(
+                        if (icon != null) IconCompat.createWithBitmap(icon)
+                        else IconCompat.createWithResource(this, R.drawable.ic_stat)
+                    )
+                    .setIntent(
+                        Intent(this, ServerActivity::class.java)
+                            .setAction(Intent.ACTION_VIEW)
+                            .putExtra(ServerActivity.EXTRA_ID, s.id)
+                    )
+                    .build()
+            }
+            ShortcutManagerCompat.setDynamicShortcuts(this, list)
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun showGlobalTools() {
+        val labels = arrayOf(
+            getString(R.string.monitors_title),
+            getString(R.string.sched_title),
+            getString(R.string.broadcast_title)
+        )
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.tools)
+            .setItems(labels) { _, which ->
+                val cls = when (which) {
+                    0 -> MonitorsActivity::class.java
+                    1 -> SchedulesActivity::class.java
+                    else -> BroadcastActivity::class.java
+                }
+                startActivity(Intent(this, cls))
+            }
+            .show()
+    }
+
+    private fun installKey(s: Server) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.menu_install_key)
+            .setMessage(R.string.install_key_msg)
+            .setPositiveButton(R.string.continue_) { _, _ ->
+                toast(R.string.install_key_working)
+                thread(name = "key-install") {
+                    try {
+                        KeyInstaller.install(store, s)
+                        onUi {
+                            toast(R.string.install_key_done)
+                            refresh()
+                        }
+                    } catch (e: Exception) {
+                        val msg = Ssh.friendlyError(e)
+                        onUi { toast(getString(R.string.install_key_failed, msg)) }
+                    }
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun wake(s: Server) {
+        thread(name = "wol") {
+            val ok = Net.wol(s.mac)
+            onUi { toast(if (ok) R.string.wol_sent else R.string.wol_failed) }
+        }
     }
 
     private fun applyFilter() {
         val q = query.lowercase()
-        val list = if (q.isEmpty()) all else all.filter {
-            it.name.lowercase().contains(q) || it.host.lowercase().contains(q) ||
-                it.username.lowercase().contains(q)
+        val list = all.filter { s ->
+            (selectedGroup == null || s.group == selectedGroup) &&
+                (q.isEmpty() || s.name.lowercase().contains(q) || s.host.lowercase().contains(q) ||
+                    s.username.lowercase().contains(q) || s.group.lowercase().contains(q))
         }
         adapter.submitList(list) {
             if (firstLoad && list.isNotEmpty()) {
@@ -148,6 +269,11 @@ class MainActivity : BaseActivity() {
         adapter.resetPings()
         val left = AtomicInteger(servers.size)
         for (s in servers) {
+            if (s.jumpId.isNotBlank()) {
+                adapter.setPing(s.id, -2)
+                if (left.decrementAndGet() == 0) b.swipe.isRefreshing = false
+                continue
+            }
             try {
                 pool.execute {
                     val ms = Net.ping(s.host, s.port)
@@ -183,7 +309,9 @@ class MainActivity : BaseActivity() {
         popup.menu.add(0, 2, 1, getString(R.string.menu_duplicate))
         popup.menu.add(0, 3, 2, getString(R.string.menu_copy_ssh))
         popup.menu.add(0, 4, 3, getString(R.string.menu_reset_hostkey))
-        popup.menu.add(0, 5, 4, getString(R.string.menu_delete))
+        popup.menu.add(0, 6, 4, getString(R.string.menu_install_key))
+        if (s.mac.isNotBlank()) popup.menu.add(0, 7, 5, getString(R.string.menu_wol))
+        popup.menu.add(0, 5, 9, getString(R.string.menu_delete))
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> showEditor(s)
@@ -210,6 +338,8 @@ class MainActivity : BaseActivity() {
                     Toast.makeText(this, R.string.hostkey_reset_done, Toast.LENGTH_SHORT).show()
                 }
                 5 -> confirmDelete(s)
+                6 -> installKey(s)
+                7 -> wake(s)
             }
             true
         }
@@ -237,9 +367,32 @@ class MainActivity : BaseActivity() {
             d.etUser.setText(existing.username)
             d.etPass.setText(existing.password)
             d.etKey.setText(existing.privateKey)
+            d.etPanelUrl.setText(existing.panelUrl)
+            d.etPanelKey.setText(existing.panelKey)
+            d.etGroup.setText(existing.group)
+            d.etMac.setText(existing.mac)
+            d.cbAlerts.isChecked = existing.alerts
         } else {
             d.etPort.setText("22")
             d.etUser.setText("root")
+        }
+
+        var jumpId = existing?.jumpId.orEmpty()
+        val others = all.filter { it.id != existing?.id }
+        fun refreshJump() {
+            val name = others.firstOrNull { it.id == jumpId }?.name ?: getString(R.string.jump_none)
+            d.btnJump.text = getString(R.string.jump_label, name)
+        }
+        refreshJump()
+        d.btnJump.setOnClickListener {
+            val labels = arrayOf(getString(R.string.jump_none)) + others.map { it.name }
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.jump_title)
+                .setItems(labels) { _, i ->
+                    jumpId = if (i == 0) "" else others[i - 1].id
+                    refreshJump()
+                }
+                .show()
         }
 
         val dialog = MaterialAlertDialogBuilder(this)
@@ -272,6 +425,12 @@ class MainActivity : BaseActivity() {
                         username = d.etUser.text.toString().trim().ifBlank { "root" },
                         password = d.etPass.text.toString(),
                         privateKey = d.etKey.text.toString(),
+                        panelUrl = d.etPanelUrl.text.toString().trim().trimEnd('/'),
+                        panelKey = d.etPanelKey.text.toString().trim(),
+                        group = d.etGroup.text.toString().trim(),
+                        mac = d.etMac.text.toString().trim(),
+                        jumpId = jumpId,
+                        alerts = d.cbAlerts.isChecked,
                         hostKey = if (existing == null || hostChanged) "" else existing.hostKey
                     )
                 )
@@ -315,7 +474,8 @@ class ServerAdapter(
     override fun onBindViewHolder(holder: VH, position: Int) {
         val s = getItem(position)
         holder.b.tvName.text = s.name
-        holder.b.tvAddr.text = "${s.username}@${s.host}:${s.port}"
+        holder.b.tvAddr.text = "${s.username}@${s.host}:${s.port}" +
+            if (s.group.isNotBlank()) "  •  ${s.group}" else ""
         holder.b.btnFav.setImageResource(if (s.favorite) R.drawable.ic_star else R.drawable.ic_star_outline)
         holder.b.root.setOnClickListener { onClick(s) }
         holder.b.btnMenu.setOnClickListener { onMenu(s, it) }
@@ -339,6 +499,10 @@ class ServerAdapter(
             ms == null -> {
                 color = ctx.zColor(R.attr.zTextDim)
                 label = "…"
+            }
+            ms == -2 -> {
+                color = ctx.zColor(R.attr.zTextDim)
+                label = "via jump"
             }
             ms > 0 -> {
                 color = ctx.zColor(R.attr.zOk)

@@ -16,6 +16,8 @@ import kotlin.concurrent.thread
 class SplashActivity : BaseActivity() {
 
     private lateinit var b: ActivitySplashBinding
+
+    override val lockable = false
     private val animators = mutableListOf<Animator>()
     private var launched = false
 

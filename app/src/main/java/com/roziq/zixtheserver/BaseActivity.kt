@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
 import android.view.View
+import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -26,12 +27,47 @@ abstract class BaseActivity : AppCompatActivity() {
         appliedTheme = prefs.theme
         setTheme(Themes.byId(appliedTheme).style)
         super.onCreate(savedInstanceState)
+        // Saat kunci aktif, blokir screenshot dan thumbnail di daftar aplikasi terbaru.
+        if (prefs.lockEnabled) {
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE
+            )
+        }
+    }
+
+    /** Splash tidak meminta kunci; layar berikutnya (Main) yang meminta. */
+    protected open val lockable: Boolean = true
+
+    override fun onStart() {
+        super.onStart()
+        if (lockable && prefs.lockEnabled && AppLock.needsAuth()) {
+            window.decorView.visibility = View.INVISIBLE
+            AppLock.authenticate(this, getString(R.string.lock_title)) { ok ->
+                if (ok && !isDestroyed) {
+                    window.decorView.visibility = View.VISIBLE
+                } else {
+                    finishAffinity()
+                }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        AppLock.touch()
         // Tema diganti dari layar lain: buat ulang agar warnanya ikut berubah.
         if (prefs.theme != appliedTheme) recreate()
+    }
+
+    override fun onPause() {
+        AppLock.touch()
+        super.onPause()
+    }
+
+    override fun onStop() {
+        AppLock.touch()
+        super.onStop()
     }
 
     protected fun haptic(v: View) {

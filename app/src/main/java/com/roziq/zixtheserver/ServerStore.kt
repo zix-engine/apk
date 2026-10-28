@@ -41,6 +41,21 @@ class ServerStore(context: Context) {
 
     fun get(id: String): Server? = list().firstOrNull { it.id == id }
 
+    /** Membuka sesi SSH (mendukung jump host) dan menyimpan host key saat pertama kali. */
+    fun open(s: Server): com.jcraft.jsch.Session {
+        val jump = if (s.jumpId.isNotBlank()) get(s.jumpId) else null
+        return Ssh.connect(
+            s,
+            { fp -> get(s.id)?.let { save(it.copy(hostKey = fp)) } },
+            jump
+        ) { fp -> jump?.let { j -> get(j.id)?.let { save(it.copy(hostKey = fp)) } } }
+    }
+
+    /** Menghapus semua server (dipakai fitur hapus data darurat). */
+    fun clearAll() = synchronized(LOCK) {
+        prefs.edit().remove(KEY).apply()
+    }
+
     /** Tandai server baru saja dipakai (untuk urutan di daftar). */
     fun touch(id: String) {
         get(id)?.let { save(it.copy(lastUsed = System.currentTimeMillis())) }
@@ -98,6 +113,12 @@ class ServerStore(context: Context) {
         put("hostKey", s.hostKey)
         put("favorite", s.favorite)
         put("lastUsed", s.lastUsed)
+        put("panelUrl", s.panelUrl)
+        put("panelKey", s.panelKey)
+        put("group", s.group)
+        put("mac", s.mac)
+        put("jumpId", s.jumpId)
+        put("alerts", s.alerts)
     }
 
     private fun fromJson(o: JSONObject) = Server(
@@ -110,7 +131,13 @@ class ServerStore(context: Context) {
         privateKey = o.optString("privateKey"),
         hostKey = o.optString("hostKey"),
         favorite = o.optBoolean("favorite", false),
-        lastUsed = o.optLong("lastUsed", 0L)
+        lastUsed = o.optLong("lastUsed", 0L),
+        panelUrl = o.optString("panelUrl"),
+        panelKey = o.optString("panelKey"),
+        group = o.optString("group"),
+        mac = o.optString("mac"),
+        jumpId = o.optString("jumpId"),
+        alerts = o.optBoolean("alerts", false)
     )
 
     companion object {

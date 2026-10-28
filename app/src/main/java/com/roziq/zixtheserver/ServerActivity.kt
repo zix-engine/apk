@@ -104,6 +104,26 @@ class ServerActivity : BaseActivity() {
             store.save(server)
             bindFav()
         }
+        b.btnTools.setOnClickListener {
+            haptic(it)
+            showTools()
+        }
+        b.btnFiles.setOnClickListener {
+            haptic(it)
+            startActivity(
+                Intent(this, FilesActivity::class.java).putExtra(FilesActivity.EXTRA_ID, server.id)
+            )
+        }
+        b.btnPtero.setOnClickListener {
+            haptic(it)
+            if (server.panelUrl.isBlank() || server.panelKey.isBlank()) {
+                toast(R.string.ptero_not_set)
+            } else {
+                startActivity(
+                    Intent(this, PteroActivity::class.java).putExtra(PteroActivity.EXTRA_ID, server.id)
+                )
+            }
+        }
         b.btnAuto.setOnClickListener {
             haptic(it)
             prefs.autoRefresh = !prefs.autoRefresh
@@ -202,8 +222,53 @@ class ServerActivity : BaseActivity() {
         rebuild()
     }
 
-    private fun onAction(action: Action) {
-        val command = Actions.resolve(action.command, server)
+    private fun onAction(item: Row.Item) {
+        val action = item.action
+        if (item.snippetId != null) {
+            askVars(action.command) { cmd -> runAction(action, cmd) }
+        } else {
+            runAction(action, action.command)
+        }
+    }
+
+    /** Perintah buatan sendiri boleh memakai {variabel}; nilainya ditanyakan sebelum dijalankan. */
+    private fun askVars(command: String, onReady: (String) -> Unit) {
+        val names = Regex("\\{([A-Za-z_][A-Za-z0-9_]*)\\}").findAll(command)
+            .map { it.groupValues[1] }.filter { it != "SSH_PORT" }.distinct().toList()
+        if (names.isEmpty()) {
+            onReady(command)
+            return
+        }
+        val fields = names.map { n ->
+            android.widget.EditText(this).apply {
+                hint = n
+                setSingleLine(true)
+                setTextColor(zColor(R.attr.zText))
+                setHintTextColor(zColor(R.attr.zTextDim))
+            }
+        }
+        val box = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            val pad = (24 * resources.displayMetrics.density).toInt()
+            setPadding(pad, pad / 2, pad, 0)
+            fields.forEach { addView(it) }
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.vars_title)
+            .setView(box)
+            .setPositiveButton(R.string.run) { _, _ ->
+                var cmd = command
+                names.forEachIndexed { i, n ->
+                    cmd = cmd.replace("{" + n + "}", fields[i].text.toString())
+                }
+                onReady(cmd)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun runAction(action: Action, raw: String) {
+        val command = Actions.resolve(raw, server)
         if (!action.confirm) {
             openTerminal(command)
             return
@@ -213,6 +278,20 @@ class ServerActivity : BaseActivity() {
             .setMessage(getString(R.string.confirm_run, Actions.resolve(action.desc, server), command))
             .setPositiveButton(R.string.run) { _, _ -> openTerminal(command) }
             .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun showTools() {
+        val labels = Tools.all.map { it.title + " — " + it.desc }.toTypedArray()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.tools)
+            .setItems(labels) { _, which ->
+                startActivity(
+                    Intent(this, ListToolActivity::class.java)
+                        .putExtra(ListToolActivity.EXTRA_ID, server.id)
+                        .putExtra(ListToolActivity.EXTRA_TOOL, Tools.all[which].id)
+                )
+            }
             .show()
     }
 
@@ -319,14 +398,12 @@ class ServerActivity : BaseActivity() {
         val current = server
         thread(name = "ssh-stats") {
             try {
-                val session = Ssh.connect(current) { fp ->
-                    store.save(current.copy(hostKey = fp))
-                }
+                val session = store.open(current)
                 val script = assets.open("stats.sh").bufferedReader().use { it.readText() }
                 val result = try {
                     Ssh.execScript(session, script)
                 } finally {
-                    session.disconnect()
+                    Ssh.disconnect(session)
                 }
                 val map = linkedMapOf<String, String>()
                 result.lineSequence().forEach { line ->
@@ -414,12 +491,25 @@ class ServerActivity : BaseActivity() {
             b.tvServices.text = sb
         }
 
+        // Riwayat untuk grafik (tersimpan selama aplikasi hidup).
+        val hist = history.getOrPut(server.id) { Pair(ArrayList<Int>(), ArrayList<Int>()) }
+        if (cpu != null) hist.first.add(cpu)
+        if (ram != null) hist.second.add(ram)
+        while (hist.first.size > SparkView.MAX_POINTS) hist.first.removeAt(0)
+        while (hist.second.size > SparkView.MAX_POINTS) hist.second.removeAt(0)
+        b.spark.setData(hist.first, hist.second)
+        val upPct = prefs.uptimePercent(server.id)
+        b.tvChartLegend.text = getString(R.string.chart_legend) +
+            (if (upPct != null) "  •  " + getString(R.string.uptime_fmt, upPct) else "")
+
         if (!statsShown) {
             statsShown = true
             b.gaugeRow.visibility = View.VISIBLE
+            b.cardChart.visibility = View.VISIBLE
             b.cardInfo.visibility = View.VISIBLE
             reveal(b.gaugeRow, 0)
-            reveal(b.cardInfo, 120)
+            reveal(b.cardChart, 100)
+            reveal(b.cardInfo, 200)
         }
     }
 
@@ -431,12 +521,13 @@ class ServerActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_ID = "server_id"
+        private val history = HashMap<String, Pair<ArrayList<Int>, ArrayList<Int>>>()
     }
 }
 
 class ActionAdapter(
     private val onHeader: (String) -> Unit,
-    private val onClick: (Action) -> Unit,
+    private val onClick: (Row.Item) -> Unit,
     private val onLong: (Row.Item) -> Unit,
     private val onAddSnippet: (Snippet?) -> Unit
 ) : ListAdapter<Row, RecyclerView.ViewHolder>(DIFF) {
@@ -473,7 +564,7 @@ class ActionAdapter(
                 val a = row.action
                 h.b.tvTitle.text = if (a.confirm) "⚠  ${a.title}" else a.title
                 h.b.tvDesc.text = a.desc
-                h.b.root.setOnClickListener { onClick(a) }
+                h.b.root.setOnClickListener { onClick(row) }
                 h.b.root.setOnLongClickListener {
                     onLong(row)
                     true

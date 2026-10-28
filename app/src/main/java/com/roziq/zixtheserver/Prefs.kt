@@ -146,4 +146,136 @@ class Prefs(context: Context) {
         }
         p.edit().putString("snippets", arr.toString()).apply()
     }
+
+    // ---------- Kunci aplikasi & pemantauan ----------
+
+    var lockEnabled: Boolean
+        get() = p.getBoolean("lock_enabled", false)
+        set(v) = p.edit().putBoolean("lock_enabled", v).apply()
+
+    var monitor: Boolean
+        get() = p.getBoolean("monitor", false)
+        set(v) = p.edit().putBoolean("monitor", v).apply()
+
+    /** Status online terakhir tiap server (id -> true/false) untuk deteksi perubahan. */
+    fun monitorState(): Map<String, Boolean> {
+        val raw = p.getString("monitor_state", "{}") ?: "{}"
+        return try {
+            val o = JSONObject(raw)
+            o.keys().asSequence().associateWith { o.optBoolean(it) }
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
+    fun saveMonitorState(m: Map<String, Boolean>) {
+        val o = JSONObject()
+        m.forEach { (k, v) -> o.put(k, v) }
+        p.edit().putString("monitor_state", o.toString()).apply()
+    }
+
+    // ---------- v2.2: ambang alert, wipe, bahasa, skema terminal ----------
+
+    var alertCpu: Int
+        get() = p.getInt("alert_cpu", 90)
+        set(v) = p.edit().putInt("alert_cpu", v).apply()
+
+    var alertRam: Int
+        get() = p.getInt("alert_ram", 90)
+        set(v) = p.edit().putInt("alert_ram", v).apply()
+
+    var alertDisk: Int
+        get() = p.getInt("alert_disk", 90)
+        set(v) = p.edit().putInt("alert_disk", v).apply()
+
+    var wipeEnabled: Boolean
+        get() = p.getBoolean("wipe_enabled", false)
+        set(v) = p.edit().putBoolean("wipe_enabled", v).apply()
+
+    var lockFails: Int
+        get() = p.getInt("lock_fails", 0)
+        set(v) = p.edit().putInt("lock_fails", v).apply()
+
+    var termScheme: String
+        get() = p.getString("term_scheme", "theme") ?: "theme"
+        set(v) = p.edit().putString("term_scheme", v).apply()
+
+    /** Nilai mentah bebas (dipakai pemantau latar untuk cooldown dan status layanan). */
+    fun raw(key: String): String = p.getString(key, "") ?: ""
+
+    fun putRaw(key: String, value: String) {
+        p.edit().putString(key, value).apply()
+    }
+
+    // ---------- Riwayat uptime (7 hari) ----------
+
+    fun uptimeAppend(id: String, up: Boolean) {
+        val key = "up_$id"
+        val now = System.currentTimeMillis()
+        val cutoff = now - 7L * 24 * 3600 * 1000
+        val list = raw(key).split(';')
+            .filter { it.isNotEmpty() && (it.substringBefore(',').toLongOrNull() ?: 0L) > cutoff }
+            .toMutableList()
+        list.add("$now,${if (up) 1 else 0}")
+        putRaw(key, list.takeLast(700).joinToString(";"))
+    }
+
+    /** Persentase uptime 7 hari terakhir, atau null jika belum ada data. */
+    fun uptimePercent(id: String): Double? {
+        val items = raw("up_$id").split(';').filter { it.contains(',') }
+        if (items.isEmpty()) return null
+        val up = items.count { it.substringAfter(',') == "1" }
+        return up * 100.0 / items.size
+    }
+
+    // ---------- Target monitor (website / port) ----------
+
+    fun targets(): List<Target> = try {
+        val arr = JSONArray(raw("targets").ifEmpty { "[]" })
+        (0 until arr.length()).map {
+            val o = arr.getJSONObject(it)
+            Target(o.optString("id"), o.optString("name"), o.optString("addr"))
+        }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
+    fun saveTargets(list: List<Target>) {
+        val arr = JSONArray()
+        list.forEach { arr.put(JSONObject().put("id", it.id).put("name", it.name).put("addr", it.addr)) }
+        putRaw("targets", arr.toString())
+    }
+
+    // ---------- Jadwal perintah ----------
+
+    fun schedules(): List<Schedule> = try {
+        val arr = JSONArray(raw("schedules").ifEmpty { "[]" })
+        (0 until arr.length()).map {
+            val o = arr.getJSONObject(it)
+            Schedule(
+                o.optString("id"), o.optString("serverId"), o.optString("title"),
+                o.optString("command"), o.optInt("hour"), o.optInt("minute"),
+                o.optInt("days", 127), o.optBoolean("enabled", true)
+            )
+        }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
+    fun saveSchedules(list: List<Schedule>) {
+        val arr = JSONArray()
+        list.forEach {
+            arr.put(
+                JSONObject().put("id", it.id).put("serverId", it.serverId).put("title", it.title)
+                    .put("command", it.command).put("hour", it.hour).put("minute", it.minute)
+                    .put("days", it.days).put("enabled", it.enabled)
+            )
+        }
+        putRaw("schedules", arr.toString())
+    }
+
+    /** Hapus semua data aplikasi (dipakai fitur hapus data darurat). */
+    fun wipeAll() {
+        p.edit().clear().apply()
+    }
 }

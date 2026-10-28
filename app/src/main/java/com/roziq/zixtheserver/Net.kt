@@ -20,4 +20,26 @@ object Net {
             }
         }
     }
+
+    /** Mengirim magic packet Wake-on-LAN (UDP broadcast). */
+    fun wol(mac: String): Boolean {
+        val hex = mac.replace(Regex("[^0-9a-fA-F]"), "")
+        if (hex.length != 12) return false
+        val macBytes = ByteArray(6) { hex.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+        val data = ByteArray(6 + 16 * 6)
+        for (i in 0 until 6) data[i] = 0xFF.toByte()
+        for (i in 0 until 16) System.arraycopy(macBytes, 0, data, 6 + i * 6, 6)
+        val socket = java.net.DatagramSocket()
+        return try {
+            socket.broadcast = true
+            socket.send(
+                java.net.DatagramPacket(data, data.size, java.net.InetAddress.getByName("255.255.255.255"), 9)
+            )
+            true
+        } catch (e: Exception) {
+            false
+        } finally {
+            socket.close()
+        }
+    }
 }

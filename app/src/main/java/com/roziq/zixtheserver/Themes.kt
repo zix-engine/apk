@@ -24,10 +24,15 @@ object Themes {
         ThemeDef("orange", "Sunset", R.style.Theme_Zix_Orange, 0xFF140C08.toInt(), 0xFF2B1B11.toInt(), 0xFFFB923C.toInt()),
         ThemeDef("rose", "Rose", R.style.Theme_Zix_Rose, 0xFF14090E.toInt(), 0xFF2D1822.toInt(), 0xFFFB7185.toInt()),
         ThemeDef("amoled", "AMOLED Black", R.style.Theme_Zix_Amoled, 0xFF000000.toInt(), 0xFF16161A.toInt(), 0xFF38BDF8.toInt()),
+        ThemeDef("dynamic", "Material You", R.style.Theme_Zix_Dynamic, 0xFF1B1B1F.toInt(), 0xFF303034.toInt(), 0xFFA8C7FA.toInt()),
         ThemeDef("light", "Terang", R.style.Theme_Zix_Light, 0xFFF3F6FB.toInt(), 0xFFFFFFFF.toInt(), 0xFF0891B2.toInt())
     )
 
-    fun byId(id: String): ThemeDef = all.firstOrNull { it.id == id } ?: all[0]
+    /** Material You hanya ada di Android 12+. */
+    fun available(id: String): Boolean = id != "dynamic" || android.os.Build.VERSION.SDK_INT >= 31
+
+    fun byId(id: String): ThemeDef =
+        all.firstOrNull { it.id == id && available(it.id) } ?: all[0]
 }
 
 /** Ambil warna dari atribut tema aktif (mis. R.attr.zAccent). */

@@ -12,6 +12,9 @@ import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import android.text.InputType
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.roziq.zixtheserver.databinding.ActivitySettingsBinding
 import com.roziq.zixtheserver.databinding.ItemSettingBinding
@@ -49,11 +52,49 @@ class SettingsActivity : BaseActivity() {
         // ---------------------------------------------------------- Tampilan
         header(getString(R.string.set_appearance))
         ll.addView(themePicker())
+        val langRow = row(getString(R.string.set_language), languageLabel()) { chooseLanguage() }
+        langRowRef = langRow
         switchRow(getString(R.string.set_splash), getString(R.string.set_splash_desc), prefs.splash) {
             prefs.splash = it
         }
         switchRow(getString(R.string.set_haptics), getString(R.string.set_haptics_desc), prefs.haptics) {
             prefs.haptics = it
+        }
+
+        // ---------------------------------------------------------- Keamanan
+        header(getString(R.string.set_security))
+        switchRow(getString(R.string.set_lock), getString(R.string.set_lock_desc), prefs.lockEnabled) { on ->
+            if (on) {
+                if (!AppLock.isSupported(this)) {
+                    toast(R.string.set_lock_unsupported)
+                    b.root.post { build() }
+                    return@switchRow
+                }
+                AppLock.authenticate(this, getString(R.string.lock_title)) { ok ->
+                    if (ok) {
+                        prefs.lockEnabled = true
+                        toast(R.string.set_lock_on)
+                    } else {
+                        b.root.post { build() }
+                    }
+                }
+            } else {
+                prefs.lockEnabled = false
+            }
+        }
+
+        switchRow(getString(R.string.set_wipe), getString(R.string.set_wipe_desc), prefs.wipeEnabled) { on ->
+            if (!on) {
+                prefs.wipeEnabled = false
+            } else {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.set_wipe)
+                    .setMessage(R.string.set_wipe_warn)
+                    .setPositiveButton(R.string.continue_) { _, _ -> prefs.wipeEnabled = true }
+                    .setNegativeButton(R.string.cancel) { _, _ -> b.root.post { build() } }
+                    .setOnCancelListener { b.root.post { build() } }
+                    .show()
+            }
         }
 
         // ---------------------------------------------------------- Terminal
@@ -63,6 +104,8 @@ class SettingsActivity : BaseActivity() {
             getString(R.string.set_font_value, prefs.termFont)
         ) { chooseFont() }
         fontRowRef = fontRow
+        val schemeRow = row(getString(R.string.set_scheme), TermSchemes.byId(prefs.termScheme).name) { chooseScheme() }
+        schemeRowRef = schemeRow
         switchRow(getString(R.string.set_keep_screen), getString(R.string.set_keep_screen_desc), prefs.keepScreen) {
             prefs.keepScreen = it
         }
@@ -75,6 +118,13 @@ class SettingsActivity : BaseActivity() {
         header(getString(R.string.set_dashboard))
         switchRow(getString(R.string.set_auto_refresh), getString(R.string.set_auto_refresh_desc), prefs.autoRefresh) {
             prefs.autoRefresh = it
+        }
+        switchRow(getString(R.string.set_monitor), getString(R.string.set_monitor_desc), prefs.monitor) {
+            prefs.monitor = it
+            MonitorWorker.schedule(this, it)
+        }
+        row(getString(R.string.set_thresholds), getString(R.string.set_thresholds_value, prefs.alertCpu, prefs.alertRam, prefs.alertDisk)) {
+            editThresholds()
         }
         val intervalRow = row(
             getString(R.string.set_interval),
@@ -111,6 +161,9 @@ class SettingsActivity : BaseActivity() {
     }
 
     private var fontRowRef: ItemSettingBinding? = null
+    private var langRowRef: ItemSettingBinding? = null
+    private var schemeRowRef: ItemSettingBinding? = null
+    private var backupPass: String = ""
     private var intervalRowRef: ItemSettingBinding? = null
     private var repoRowRef: ItemSettingBinding? = null
 
@@ -173,11 +226,20 @@ class SettingsActivity : BaseActivity() {
             setPadding(dp(2), dp(6), dp(2), dp(10))
         }
         for (t in Themes.all) {
-            val selected = t.id == prefs.theme
+            if (!Themes.available(t.id)) continue
+            val selected = t.id == Themes.byId(prefs.theme).id
+            var pBg = t.bg
+            var pSurface = t.surface
+            var pAccent = t.accent
+            if (t.id == "dynamic" && android.os.Build.VERSION.SDK_INT >= 31) {
+                pBg = getColor(android.R.color.system_neutral1_900)
+                pSurface = getColor(android.R.color.system_neutral1_700)
+                pAccent = getColor(android.R.color.system_accent1_200)
+            }
             val swatch = View(this).apply {
                 background = GradientDrawable(
                     GradientDrawable.Orientation.TL_BR,
-                    intArrayOf(t.bg, t.surface, t.accent)
+                    intArrayOf(pBg, pSurface, pAccent)
                 ).apply {
                     shape = GradientDrawable.OVAL
                     setStroke(
@@ -282,10 +344,23 @@ class SettingsActivity : BaseActivity() {
     // ------------------------------------------------------------ Backup / restore
 
     private fun confirmBackup() {
+        val input = EditText(this).apply {
+            hint = getString(R.string.backup_pass_hint)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            setSingleLine(true)
+            setTextColor(zColor(R.attr.zText))
+            setHintTextColor(zColor(R.attr.zTextDim))
+        }
+        val holder = FrameLayout(this).apply {
+            setPadding(dp(24), dp(8), dp(24), 0)
+            addView(input)
+        }
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.set_backup)
             .setMessage(R.string.backup_warning)
+            .setView(holder)
             .setPositiveButton(R.string.continue_) { _, _ ->
+                backupPass = input.text.toString()
                 backupLauncher.launch("zixtheserver-backup.json")
             }
             .setNegativeButton(R.string.cancel, null)
@@ -294,8 +369,11 @@ class SettingsActivity : BaseActivity() {
 
     private fun doExport(uri: Uri) {
         try {
+            var text = store.exportJson()
+            if (backupPass.isNotEmpty()) text = BackupCrypto.encrypt(text, backupPass.toCharArray())
+            backupPass = ""
             contentResolver.openOutputStream(uri)?.use {
-                it.write(store.exportJson().toByteArray(Charsets.UTF_8))
+                it.write(text.toByteArray(Charsets.UTF_8))
             }
             toast(R.string.backup_done)
         } catch (e: Exception) {
@@ -308,10 +386,110 @@ class SettingsActivity : BaseActivity() {
             val text = contentResolver.openInputStream(uri)?.use {
                 it.readBytes().toString(Charsets.UTF_8)
             } ?: throw IllegalStateException("File kosong")
-            val n = store.importJson(text)
-            toast(getString(R.string.restore_done, n))
+            if (BackupCrypto.isEncrypted(text)) {
+                askPassAndImport(text)
+            } else {
+                toast(getString(R.string.restore_done, store.importJson(text)))
+            }
         } catch (e: Exception) {
             toast(getString(R.string.restore_failed, e.message ?: ""))
         }
+    }
+
+    private fun askPassAndImport(wrapped: String) {
+        val input = EditText(this).apply {
+            hint = getString(R.string.backup_pass_ask)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            setSingleLine(true)
+            setTextColor(zColor(R.attr.zText))
+            setHintTextColor(zColor(R.attr.zTextDim))
+        }
+        val holder = FrameLayout(this).apply {
+            setPadding(dp(24), dp(8), dp(24), 0)
+            addView(input)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.set_restore)
+            .setView(holder)
+            .setPositiveButton(R.string.continue_) { _, _ ->
+                try {
+                    val plain = BackupCrypto.decrypt(wrapped, input.text.toString().toCharArray())
+                    toast(getString(R.string.restore_done, store.importJson(plain)))
+                } catch (e: Exception) {
+                    toast(R.string.backup_pass_wrong)
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    // ------------------------------------------------------------ Bahasa, skema, ambang
+
+    private fun languageLabel(): String {
+        val tags = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+        return when {
+            tags.startsWith("en") -> "English"
+            tags.startsWith("in") || tags.startsWith("id") -> "Bahasa Indonesia"
+            else -> getString(R.string.lang_system)
+        }
+    }
+
+    private fun chooseLanguage() {
+        val labels = arrayOf(getString(R.string.lang_system), "Bahasa Indonesia", "English")
+        val tags = arrayOf("", "id", "en")
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.set_language)
+            .setItems(labels) { _, i ->
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tags[i]))
+            }
+            .show()
+    }
+
+    private fun chooseScheme() {
+        val list = TermSchemes.all
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.set_scheme)
+            .setSingleChoiceItems(
+                list.map { it.name }.toTypedArray(),
+                list.indexOfFirst { it.id == prefs.termScheme }.coerceAtLeast(0)
+            ) { d, which ->
+                prefs.termScheme = list[which].id
+                schemeRowRef?.tvDesc?.text = list[which].name
+                d.dismiss()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun editThresholds() {
+        fun field(label: String, value: Int) = EditText(this).apply {
+            hint = label
+            inputType = InputType.TYPE_CLASS_NUMBER
+            setText(value.toString())
+            setTextColor(zColor(R.attr.zText))
+            setHintTextColor(zColor(R.attr.zTextDim))
+        }
+        val cpu = field("CPU %", prefs.alertCpu)
+        val ram = field("RAM %", prefs.alertRam)
+        val disk = field("Disk %", prefs.alertDisk)
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(8), dp(24), 0)
+            addView(cpu)
+            addView(ram)
+            addView(disk)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.set_thresholds)
+            .setMessage(R.string.set_thresholds_help)
+            .setView(box)
+            .setPositiveButton(R.string.save) { _, _ ->
+                prefs.alertCpu = cpu.text.toString().toIntOrNull()?.coerceIn(1, 100) ?: 90
+                prefs.alertRam = ram.text.toString().toIntOrNull()?.coerceIn(1, 100) ?: 90
+                prefs.alertDisk = disk.text.toString().toIntOrNull()?.coerceIn(1, 100) ?: 90
+                build()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 }
