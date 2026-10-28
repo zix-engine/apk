@@ -45,6 +45,15 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/btnTools"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/tools"
+                android:padding="12dp"
+                android:src="@drawable/ic_more" />
+
+            <ImageView
                 android:id="@+id/btnSettings"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
@@ -76,6 +85,23 @@
             android:textColor="?attr/zText"
             android:textColorHint="?attr/zTextDim"
             android:textSize="14sp" />
+
+        <HorizontalScrollView
+            android:id="@+id/groupScroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="6dp"
+            android:scrollbars="none"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/llGroups"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
 
         <FrameLayout
             android:layout_width="match_parent"
