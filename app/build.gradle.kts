@@ -81,6 +81,9 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("androidx.biometric:biometric:1.1.0")
+    implementation("androidx.work:work-runtime:2.9.1")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // SSH client (fork JSch yang aktif dirawat, mendukung algoritma modern)
     implementation("com.github.mwiede:jsch:0.2.18")
