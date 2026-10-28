@@ -3,17 +3,29 @@
 Aplikasi Android (Kotlin) untuk mengontrol server Linux lewat SSH dan memasang
 Pterodactyl (Panel + Wings) dari HP.
 
-## Fitur (v2)
+## Fitur (v2.2)
 
-- **7 tema** (Cyber Cyan, Neon Violet, Matrix Green, Sunset, Rose, AMOLED, Terang), ganti di Pengaturan.
-- **Animasi loading** saat aplikasi dibuka (bisa dimatikan), ikon adaptive baru, transisi antar layar halus.
-- **Daftar server**: cari, favorit, status online + ping, tarik untuk refresh, duplikat, salin perintah SSH.
-- **Dashboard**: gauge CPU/RAM/disk live, auto-refresh, status layanan, jumlah container Docker.
-- **80+ aksi cepat** (Pterodactyl, Docker, Sistem, Jaringan, Database, Dev & Game, Keamanan, Web & SSL):
-  bisa dicari, dilipat per kategori, ditandai favorit (tekan lama), dan **perintah buatan sendiri**.
-- **Terminal**: riwayat perintah, bagikan output, zoom font, sambung ulang, tombol Ctrl/panah/simbol lengkap.
-- **Backup/Restore** daftar server, getar halus, layar tetap menyala.
-- **Update dalam aplikasi** dari GitHub Releases.
+**Dasar:** 8 tema (termasuk Material You), animasi loading, ikon adaptive, update dalam aplikasi dari GitHub Releases,
+bahasa Indonesia/English (menu Pengaturan), backup daftar server (bisa dienkripsi passphrase).
+
+**Server:** cari, grup/tag, favorit + pintasan ikon, ping online/offline, jump host, Wake-on-LAN,
+pasang SSH key otomatis, layout 2 kolom di layar lebar.
+
+**Dashboard:** gauge + grafik CPU/RAM, uptime 7 hari, 80+ aksi cepat (cari, lipat, favorit, perintah sendiri
+dengan `{variabel}`), dan **Alat** server: Proses, Layanan systemd, Docker, Firewall UFW, Cron, Update paket,
+Log viewer, Login SSH gagal.
+
+**Terminal:** multi-tab, warna ANSI, cari di output, skema warna (Dracula, Nord, ...), riwayat, bagikan output.
+
+**File manager SFTP:** jelajah, unduh, unggah, edit teks, ganti nama, hapus.
+
+**Pterodactyl (Client API):** daftar game server + grafik, Start/Restart/Stop/Kill, **konsol live**, kirim perintah,
+backup (buat/unduh/restore/hapus), jadwal Panel, edit file (mis. `server.properties`).
+
+**Otomasi:** jadwal perintah (di latar), jalankan satu perintah ke banyak server, monitor website/port + masa
+berlaku SSL, alert CPU/RAM/disk/layanan mati, notifikasi server offline/pulih, widget layar utama.
+
+**Keamanan:** kunci aplikasi (sidik jari/wajah/PIN layar), blokir screenshot, hapus data darurat (opsional).
 
 ## Deploy & update lewat GitHub
 
@@ -43,3 +55,6 @@ JDK 17 + Android SDK 34: `gradle assembleRelease` (atau buka di Android Studio).
 - Update Panel/Wings: backup database dan `.env` dulu.
 - Setelah server di-install ulang, fingerprint berubah: pakai **Reset host key**.
 - File backup server berisi password/private key polos; simpan aman.
+- Pemantau latar & jadwal memakai WorkManager: waktunya perkiraan (minimal 15 menit, bisa tertunda mode hemat baterai).
+- Hapus data darurat hanya menghitung kegagalan **biometrik**, bukan PIN layar.
+- Nama aksi cepat dan alat server masih berbahasa Indonesia; menu/dialog utama sudah dua bahasa.
