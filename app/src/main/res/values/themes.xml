@@ -166,6 +166,21 @@
         <item name="zTermFg">#0F172A</item>
     </style>
 
+    <style name="Theme.Zix.Dynamic" parent="Theme.Zix.Base.Dark">
+        <item name="zBg">#0A0E1A</item>
+        <item name="zSurface">#121829</item>
+        <item name="zSurface2">#1A2238</item>
+        <item name="zStroke">#26304A</item>
+        <item name="zText">#E6EBF5</item>
+        <item name="zTextDim">#8D97AD</item>
+        <item name="zAccent">#22D3EE</item>
+        <item name="zOnAccent">#00262D</item>
+        <item name="zOk">#34D399</item>
+        <item name="zBad">#F87171</item>
+        <item name="zWarn">#FBBF24</item>
+        <item name="zTermBg">#05070D</item>
+        <item name="zTermFg">#D6DEEB</item>
+    </style>
     <style name="Theme.Zix.Splash" parent="Theme.Zix.Cyan">
         <item name="android:windowBackground">@color/splash_bg</item>
     </style>

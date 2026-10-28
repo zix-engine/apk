@@ -61,7 +61,7 @@
     <string name="sec_favorites">★ Favorit</string>
     <string name="sec_mine">Perintahku</string>
     <string name="snippet_add">+ Tambah perintah sendiri</string>
-    <string name="snippet_add_desc">Simpan perintah favoritmu agar bisa dijalankan sekali ketuk.</string>
+    <string name="snippet_add_desc">Simpan perintah favoritmu agar bisa dijalankan sekali ketuk. Pakai {nama} untuk variabel.</string>
     <string name="snippet_title">Judul</string>
     <string name="snippet_command">Perintah (shell)</string>
     <string name="fav_add">Tambah ke favorit</string>
@@ -146,4 +146,170 @@
     <string name="update_progress">Mengunduh… %1$d%%</string>
     <string name="update_permission_title">Izin pasang aplikasi</string>
     <string name="update_permission_msg">Izinkan ZixTheServer memasang aplikasi dari sumber ini, lalu kembali dan ketuk update lagi.</string>
+    <!-- v2.1: File manager -->
+    <string name="files">File</string>
+    <string name="files_title">File — %1$s</string>
+    <string name="files_add">Tambah</string>
+    <string name="files_up">.. (naik satu folder)</string>
+    <string name="files_download">Unduh</string>
+    <string name="files_download_done">Unduhan selesai</string>
+    <string name="files_upload">Unggah file</string>
+    <string name="files_upload_done">Unggahan selesai</string>
+    <string name="files_edit">Edit teks</string>
+    <string name="files_saved">Tersimpan di server</string>
+    <string name="files_too_big">File terlalu besar untuk diedit (maks 256 KB).</string>
+    <string name="files_rename">Ganti nama</string>
+    <string name="files_copy_path">Salin path</string>
+    <string name="files_new_folder">Folder baru</string>
+    <string name="files_new_file">File baru</string>
+    <string name="files_delete_file">Hapus file “%1$s” dari server? Tidak bisa dibatalkan.</string>
+    <string name="files_delete_dir">Hapus folder “%1$s”? Hanya bisa jika folder kosong.</string>
+
+    <!-- Grafik, tab -->
+    <string name="chart_legend">Riwayat sesi ini — CPU (warna aksen) • RAM (kuning)</string>
+    <string name="tab_new">Tab baru</string>
+    <string name="tab_close">Tutup tab ini</string>
+
+    <!-- Pterodactyl API -->
+    <string name="panel_section">PTERODACTYL API (opsional)</string>
+    <string name="hint_panel_url">URL Panel (https://panel.contoh.com)</string>
+    <string name="hint_panel_key">Client API key (ptlc_…)</string>
+    <string name="ptero">Pterodactyl</string>
+    <string name="ptero_not_set">Isi URL Panel dan Client API key dulu lewat menu ⋮ › Edit pada server ini.</string>
+    <string name="ptero_empty">Tidak ada game server di akun API ini.</string>
+    <string name="ptero_error">Gagal: %1$s</string>
+    <string name="ptero_info">Node %1$s • ID %2$s • RAM %3$s • CPU %4$s</string>
+    <string name="ptero_suspended">Suspended</string>
+    <string name="ptero_sent">Perintah “%1$s” dikirim</string>
+    <string name="ptero_kill_msg">Kill akan menghentikan paksa “%1$s” tanpa menyimpan data. Lanjutkan?</string>
+    <string name="ptero_cmd_title">Perintah ke %1$s</string>
+    <string name="ptero_cmd_hint">mis. say Halo / op nama</string>
+    <string name="ptero_cmd_sent">Perintah dikirim ke konsol</string>
+    <string name="p_start">Start</string>
+    <string name="p_restart">Restart</string>
+    <string name="p_stop">Stop</string>
+    <string name="p_kill">Kill</string>
+    <string name="p_cmd">Lainnya</string>
+
+    <!-- Keamanan, pemantauan -->
+    <string name="set_security">Keamanan</string>
+    <string name="set_lock">Kunci aplikasi</string>
+    <string name="set_lock_desc">Minta sidik jari / wajah / PIN layar saat membuka aplikasi. Juga memblokir screenshot.</string>
+    <string name="set_lock_on">Kunci aplikasi aktif</string>
+    <string name="set_lock_unsupported">Atur dulu kunci layar (PIN/pola/sidik jari) di pengaturan HP.</string>
+    <string name="lock_title">Buka ZixTheServer</string>
+    <string name="set_monitor">Pantau server di latar</string>
+    <string name="set_monitor_desc">Cek tiap ±15 menit dan beri notifikasi saat server offline atau pulih.</string>
+    <string name="mon_channel">Status server</string>
+    <string name="mon_down">⚠ %1$s offline</string>
+    <string name="mon_down_text">%1$s tidak bisa dihubungi.</string>
+    <string name="mon_up">✓ %1$s online lagi</string>
+    <string name="mon_up_text">%1$s sudah pulih.</string>
+
+    <!-- Widget -->
+    <string name="widget_desc">Status server (online/offline) di layar utama</string>
+    <string name="widget_empty">Belum ada server</string>
+    <!-- v2.2 -->
+    <string name="tools">Alat</string>
+    <string name="tool_search">Cari…</string>
+    <string name="tool_empty">Tidak ada data.</string>
+    <string name="tool_failed">Perintah gagal dijalankan.</string>
+    <string name="tool_done">Selesai</string>
+    <string name="tool_no_menu">Tidak ada menu tambahan.</string>
+    <string name="tool_source">Pilih sumber log</string>
+    <string name="tool_confirm">Perintah yang akan dijalankan:\n\n%1$s\n\nLanjutkan?</string>
+    <string name="uptime_fmt">Uptime 7 hari: %1$.1f%%</string>
+    <string name="vars_title">Isi variabel</string>
+
+    <string name="advanced_section">LANJUTAN</string>
+    <string name="hint_group">Grup / tag (mis. Produksi, Game)</string>
+    <string name="hint_mac">MAC address (untuk Wake-on-LAN)</string>
+    <string name="alerts_check">Aktifkan alert CPU/RAM/disk/layanan untuk server ini</string>
+    <string name="group_all">Semua</string>
+    <string name="jump_none">tanpa</string>
+    <string name="jump_label">Jump host: %1$s</string>
+    <string name="jump_title">Sambung lewat server…</string>
+    <string name="menu_install_key">Pasang SSH key</string>
+    <string name="menu_wol">Wake-on-LAN</string>
+    <string name="install_key_msg">Aplikasi akan membuat SSH key baru, memasangnya di server, menguji login memakai key itu, lalu menyimpannya (password dihapus dari aplikasi). Lanjutkan?</string>
+    <string name="install_key_working">Membuat dan memasang key… (beberapa detik)</string>
+    <string name="install_key_done">Key terpasang. Login sekarang memakai key.</string>
+    <string name="install_key_failed">Gagal: %1$s</string>
+    <string name="wol_sent">Magic packet dikirim</string>
+    <string name="wol_failed">Gagal mengirim (periksa format MAC)</string>
+
+    <string name="monitors_title">Monitor website &amp; port</string>
+    <string name="monitors_sub">Dicek juga di latar bila pemantau aktif</string>
+    <string name="monitors_add">Tambah target</string>
+    <string name="monitors_empty">Belum ada target. Tambahkan URL website atau host:port (mis. game.contoh.com:25565).</string>
+    <string name="monitors_hint_name">Nama</string>
+    <string name="monitors_hint_addr">https://situs.com atau host:port</string>
+    <string name="mon_hi">⚠ %1$s: %2$s tinggi</string>
+    <string name="mon_svc">⚠ %1$s: layanan %2$s mati</string>
+    <string name="mon_ssl">⚠ SSL %1$s hampir habis</string>
+    <string name="mon_ssl_text">Sertifikat berakhir dalam %1$d hari.</string>
+
+    <string name="sched_title">Jadwal perintah</string>
+    <string name="sched_sub">Dijalankan otomatis lewat SSH</string>
+    <string name="sched_add">Tambah jadwal</string>
+    <string name="sched_empty">Belum ada jadwal. Contoh: backup database tiap jam 03:00.</string>
+    <string name="sched_channel">Jadwal perintah</string>
+    <string name="sched_daily">Setiap hari</string>
+    <string name="sched_server">Server: %1$s</string>
+    <string name="sched_time">Waktu: %1$s</string>
+    <string name="sched_days">Hari: %1$s</string>
+    <string name="sched_pick_days">Pilih hari</string>
+    <string name="sched_run_now">Jalankan sekarang</string>
+    <string name="sched_enable">Aktifkan</string>
+    <string name="sched_disable">Nonaktifkan</string>
+    <string name="sched_no_server">Server untuk jadwal ini sudah dihapus.</string>
+
+    <string name="broadcast_title">Jalankan ke banyak server</string>
+    <string name="broadcast_sub">Satu perintah, banyak server</string>
+    <string name="broadcast_new">Perintah baru</string>
+    <string name="broadcast_pick">Pilih server</string>
+    <string name="broadcast_none">Pilih minimal satu server.</string>
+    <string name="broadcast_hint">mis. apt-get update &amp;&amp; apt-get -y upgrade</string>
+    <string name="broadcast_to">Perintah ke %1$d server</string>
+    <string name="broadcast_running">menjalankan…</string>
+
+    <string name="term_search">Cari di output</string>
+    <string name="term_search_hint">Kata yang dicari</string>
+    <string name="term_search_next">Cari berikutnya</string>
+    <string name="term_search_clear">Hapus pencarian</string>
+    <string name="term_search_none">Tidak ditemukan</string>
+
+    <string name="p_console">Konsol live</string>
+    <string name="p_cmd_send">Kirim perintah</string>
+    <string name="p_backups">Backup</string>
+    <string name="p_schedules">Jadwal Panel</string>
+    <string name="p_edit_file">Edit file (mis. server.properties)</string>
+    <string name="p_edit_file_hint">Path file di game server, mis. /server.properties</string>
+    <string name="p_backup_new">Backup baru</string>
+    <string name="p_backup_started">Backup dimulai</string>
+    <string name="p_restore">Restore</string>
+    <string name="p_restore_msg">Restore menimpa file server dari backup ini dan butuh server dalam keadaan mati. Lanjutkan?</string>
+    <string name="p_restore_started">Restore dimulai</string>
+    <string name="p_delete_msg">Hapus backup ini? Tidak bisa dibatalkan.</string>
+    <string name="p_next">Berikutnya: %1$s</string>
+    <string name="console_connecting">Menghubungkan konsol…</string>
+    <string name="console_live">● Konsol live</string>
+    <string name="console_state">Status: %1$s</string>
+    <string name="console_failed">Konsol gagal: %1$s</string>
+    <string name="console_closed">Koneksi konsol ditutup</string>
+
+    <string name="set_language">Bahasa</string>
+    <string name="lang_system">Ikuti sistem</string>
+    <string name="set_scheme">Skema warna terminal</string>
+    <string name="set_thresholds">Ambang alert</string>
+    <string name="set_thresholds_value">CPU %1$d%% • RAM %2$d%% • Disk %3$d%%</string>
+    <string name="set_thresholds_help">Notifikasi dikirim bila melewati batas ini (hanya server yang alert-nya diaktifkan).</string>
+    <string name="set_wipe">Hapus data darurat</string>
+    <string name="set_wipe_desc">Hapus semua data aplikasi setelah 10 kali gagal sidik jari/wajah berturut-turut.</string>
+    <string name="set_wipe_warn">Setelah 10 kali verifikasi biometrik gagal berturut-turut, SEMUA server dan pengaturan akan dihapus permanen. Fitur ini hanya menghitung kegagalan biometrik, bukan PIN layar. Aktifkan?</string>
+    <string name="backup_pass_hint">Passphrase (kosongkan = tanpa enkripsi)</string>
+    <string name="backup_pass_ask">Passphrase backup</string>
+    <string name="backup_pass_wrong">Passphrase salah atau file rusak</string>
 </resources>
+
+
