@@ -55,6 +55,26 @@
             android:exported="false" />
 
         <activity
+            android:name=".TradingActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ProjectsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ProjectActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CalcActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".BackupActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ListToolActivity"
             android:exported="false" />
 
