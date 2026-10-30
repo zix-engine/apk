@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Zix.Splash" parent="Theme.Zix.Cyan">
+    <style name="Theme.Zix.Splash" parent="Theme.Zix.Indigo">
         <item name="android:windowBackground">@color/splash_bg</item>
         <item name="android:windowSplashScreenBackground">@color/splash_bg</item>
     </style>
