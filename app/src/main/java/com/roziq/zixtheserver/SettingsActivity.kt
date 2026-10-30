@@ -134,6 +134,9 @@ class SettingsActivity : BaseActivity() {
 
         // ---------------------------------------------------------- Data
         header(getString(R.string.set_data))
+        row("Full Backup & Restore", "Semua data lokal (server, pengaturan, trading) dalam satu file, dengan checksum.") {
+            startActivity(Intent(this, BackupActivity::class.java))
+        }
         row(getString(R.string.set_backup), getString(R.string.set_backup_desc)) { confirmBackup() }
         row(getString(R.string.set_restore), getString(R.string.set_restore_desc)) {
             restoreLauncher.launch(arrayOf("*/*"))

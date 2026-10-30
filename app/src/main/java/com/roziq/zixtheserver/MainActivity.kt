@@ -185,6 +185,8 @@ class MainActivity : BaseActivity() {
 
     private fun showGlobalTools() {
         val labels = arrayOf(
+            "Trading (kalkulator, backtest, jurnal)",
+            "Full Backup & Restore",
             getString(R.string.monitors_title),
             getString(R.string.sched_title),
             getString(R.string.broadcast_title)
@@ -193,8 +195,10 @@ class MainActivity : BaseActivity() {
             .setTitle(R.string.tools)
             .setItems(labels) { _, which ->
                 val cls = when (which) {
-                    0 -> MonitorsActivity::class.java
-                    1 -> SchedulesActivity::class.java
+                    0 -> TradingActivity::class.java
+                    1 -> BackupActivity::class.java
+                    2 -> MonitorsActivity::class.java
+                    3 -> SchedulesActivity::class.java
                     else -> BroadcastActivity::class.java
                 }
                 startActivity(Intent(this, cls))

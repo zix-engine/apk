@@ -18,6 +18,7 @@ data class ThemeDef(
 object Themes {
 
     val all: List<ThemeDef> = listOf(
+        ThemeDef("indigo", "Zix Indigo", R.style.Theme_Zix_Indigo, 0xFF0C0B1E.toInt(), 0xFF1D1B3A.toInt(), 0xFF8B7CF6.toInt()),
         ThemeDef("cyan", "Cyber Cyan", R.style.Theme_Zix_Cyan, 0xFF0A0E1A.toInt(), 0xFF1A2238.toInt(), 0xFF22D3EE.toInt()),
         ThemeDef("violet", "Neon Violet", R.style.Theme_Zix_Violet, 0xFF0D0A1A.toInt(), 0xFF201A3D.toInt(), 0xFFA78BFA.toInt()),
         ThemeDef("green", "Matrix Green", R.style.Theme_Zix_Green, 0xFF050E09.toInt(), 0xFF10261A.toInt(), 0xFF4ADE80.toInt()),

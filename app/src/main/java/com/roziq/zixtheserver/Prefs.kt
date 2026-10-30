@@ -14,7 +14,7 @@ class Prefs(context: Context) {
         .getSharedPreferences("zix_prefs", Context.MODE_PRIVATE)
 
     var theme: String
-        get() = p.getString("theme", "cyan") ?: "cyan"
+        get() = p.getString("theme", "indigo") ?: "indigo"
         set(v) = p.edit().putString("theme", v).apply()
 
     var termFont: Int
@@ -277,5 +277,43 @@ class Prefs(context: Context) {
     /** Hapus semua data aplikasi (dipakai fitur hapus data darurat). */
     fun wipeAll() {
         p.edit().clear().apply()
+    }
+
+    // ---------- Ekspor/impor pengaturan untuk Full Backup ----------
+
+    private val exportStr = listOf("theme", "term_scheme", "repo_override", "snippets", "schedules", "targets")
+    private val exportInt = listOf("term_font", "refresh_sec", "alert_cpu", "alert_ram", "alert_disk")
+    private val exportBool = listOf("keep_screen", "haptics", "auto_refresh", "splash", "auto_update", "monitor")
+    private val exportSet = listOf("fav_actions", "collapsed")
+
+    /** Hanya pengaturan non-rahasia. Status kunci aplikasi, token, dan riwayat perintah sengaja tidak diekspor. */
+    fun exportSettings(): JSONObject {
+        val o = JSONObject()
+        for (k in exportStr) if (p.contains(k)) o.put(k, p.getString(k, "") ?: "")
+        for (k in exportInt) if (p.contains(k)) o.put(k, p.getInt(k, 0))
+        for (k in exportBool) if (p.contains(k)) o.put(k, p.getBoolean(k, false))
+        for (k in exportSet) if (p.contains(k)) {
+            val arr = JSONArray()
+            (p.getStringSet(k, emptySet()) ?: emptySet()).forEach { arr.put(it) }
+            o.put(k, arr)
+        }
+        return o
+    }
+
+    fun importSettings(o: JSONObject): Int {
+        val e = p.edit()
+        var n = 0
+        for (k in exportStr) if (o.has(k)) { e.putString(k, o.optString(k)); n++ }
+        for (k in exportInt) if (o.has(k)) { e.putInt(k, o.optInt(k)); n++ }
+        for (k in exportBool) if (o.has(k)) { e.putBoolean(k, o.optBoolean(k)); n++ }
+        for (k in exportSet) if (o.has(k)) {
+            val arr = o.optJSONArray(k) ?: JSONArray()
+            val set = HashSet<String>()
+            for (i in 0 until arr.length()) set.add(arr.optString(i))
+            e.putStringSet(k, set)
+            n++
+        }
+        e.apply()
+        return n
     }
 }
