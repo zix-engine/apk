@@ -1,60 +1,55 @@
-# ZixTheServer
+# ZixFunction
 
-Aplikasi Android (Kotlin) untuk mengontrol server Linux lewat SSH dan memasang
-Pterodactyl (Panel + Wings) dari HP.
+Pembaruan dari **ZixTheServer**: aplikasi Android (Kotlin) untuk mengelola server (SSH, SFTP, Docker, Pterodactyl, monitor)
+ditambah modul **trading lokal** (kalkulator, backtest, jurnal) dan **Full Backup & Restore**.
+Status lengkap tiap bagian spesifikasi: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
 
-## Fitur (v2.2)
+> Build Android **belum diverifikasi** oleh pembuatnya (tidak ada Android SDK di lingkungan pembuatan). Hasil build pertama di GitHub Actions yang menentukan.
 
-**Dasar:** 8 tema (termasuk Material You), animasi loading, ikon adaptive, update dalam aplikasi dari GitHub Releases,
-bahasa Indonesia/English (menu Pengaturan), backup daftar server (bisa dienkripsi passphrase).
+## Struktur proyek
+```
+app/                    modul Android (package com.roziq.zixtheserver — dipertahankan agar bisa update dari versi lama)
+  src/main/java/...     Activity, SSH/SFTP, Tools, Trading (ZixDb, TradeStats, TradeCalc), FullBackup, dst.
+  src/main/res/         layout, tema (Indigo default), string (ID + EN), ikon
+  src/test/             unit test statistik & kalkulator
+.github/workflows/      build APK + rilis otomatis
+IMPLEMENTATION_STATUS.md
+```
+Backend (Node/MySQL) **belum ada** di versi ini.
 
-**Server:** cari, grup/tag, favorit + pintasan ikon, ping online/offline, jump host, Wake-on-LAN,
-pasang SSH key otomatis, layout 2 kolom di layar lebar.
+## Build
+**GitHub Actions (disarankan):** push ke repo **publik**; workflow `Build & Release APK` membangun APK dan membuat Release
+(`ZixFunction-vX.Y.N.apk`). Update dalam aplikasi membaca Release itu.
 
-**Dashboard:** gauge + grafik CPU/RAM, uptime 7 hari, 80+ aksi cepat (cari, lipat, favorit, perintah sendiri
-dengan `{variabel}`), dan **Alat** server: Proses, Layanan systemd, Docker, Firewall UFW, Cron, Update paket,
-Log viewer, Login SSH gagal.
+**AIDE Pro:** kemungkinan besar **tidak kompatibel** (proyek memakai Gradle 8/AGP 8, View Binding, Material 1.12, WorkManager, Kotlin).
+Tidak diverifikasi. Pakai GitHub Actions atau Android Studio.
 
-**Terminal:** multi-tab, warna ANSI, cari di output, skema warna (Dracula, Nord, ...), riwayat, bagikan output.
+**Android Studio:** JDK 17, Android SDK 34 → `gradle assembleRelease`.
 
-**File manager SFTP:** jelajah, unduh, unggah, edit teks, ganti nama, hapus.
+### Tanda tangan
+Kunci tidak disimpan di repo. Isi GitHub Secrets: `ZIX_KEYSTORE_BASE64`, `ZIX_KEYSTORE_PASSWORD`, `ZIX_KEY_ALIAS`, `ZIX_KEY_PASSWORD`.
+Tanpa Secrets, APK memakai kunci debug: bisa dipasang baru tetapi **tidak bisa menimpa** instalasi lama (workflow memberi peringatan).
+Buat keystore: `keytool -genkeypair -v -keystore zix.jks -alias zix -keyalg RSA -keysize 2048 -validity 36500`,
+lalu `base64 -w0 zix.jks` → isi `ZIX_KEYSTORE_BASE64`. Jangan commit file `.jks`.
 
-**Pterodactyl (Client API):** daftar game server + grafik, Start/Restart/Stop/Kill, **konsol live**, kirim perintah,
-backup (buat/unduh/restore/hapus), jadwal Panel, edit file (mis. `server.properties`).
+## Backend, MySQL/MariaDB, migration, Owner pertama, endpoint API
+Belum ada di versi ini (lihat status). Rencananya ada di `IMPLEMENTATION_STATUS.md`.
 
-**Otomasi:** jadwal perintah (di latar), jalankan satu perintah ke banyak server, monitor website/port + masa
-berlaku SSL, alert CPU/RAM/disk/layanan mati, notifikasi server offline/pulih, widget layar utama.
+## Backup & restore
+Menu ⋮ › **Full Backup & Restore** (atau Pengaturan). Satu ZIP berisi `manifest.json` (versi, kategori, checksum SHA-256) dan
+`servers/settings/trading`. Dengan **passphrase**: dienkripsi AES-256-GCM (PBKDF2) dan kredensial server ikut. **Tanpa passphrase**:
+kredensial dikosongkan. Restore memverifikasi checksum, menampilkan pratinjau, membuat cadangan pengaman, lalu memilih **Gabung**
+atau **Ganti semua** (data trading). Laporan menyebut apa yang termasuk dan tidak termasuk.
 
-**Keamanan:** kunci aplikasi (sidik jari/wajah/PIN layar), blokir screenshot, hapus data darurat (opsional).
+## Yang benar-benar ada
+Server & SSH multi-tab (warna ANSI), SFTP, alat server (proses/layanan/Docker/UFW/cron/update/log/login gagal), Pterodactyl
+(daftar, power, konsol live, backup, jadwal, edit file), jump host, Wake-on-LAN, SSH key otomatis, monitor + alert, jadwal perintah,
+widget, kunci aplikasi, update dalam aplikasi, **Trading**: 12 kalkulator, backtest, jurnal, statistik, equity curve, ekspor.
 
-## Deploy & update lewat GitHub
+## Yang masih butuh server/API/pekerjaan lanjutan
+Login & manajemen akun, backend & database, market data/chart/berita, AI Assistant, backup data backend, RBAC/audit/2FA.
 
-1. Upload isi folder ini ke repo GitHub **publik**.
-2. Setiap `git push` ke `main`, GitHub Actions otomatis build APK dan membuat **Release** baru
-   (`ZixTheServer-vX.Y.N.apk`).
-3. Di HP: buka aplikasi > muncul dialog update (atau Pengaturan > Cek update sekarang) > Update > Pasang.
-   Repo terisi otomatis dari build; bisa diubah di Pengaturan.
-
-Naikkan versi besar dengan mengubah `APP_VERSION_BASE` di `gradle.properties`.
-
-### Tanda tangan (penting)
-APK baru hanya bisa menimpa yang lama bila **tanda tangannya sama**. Bawaan: `app/zix-release.jks`
-ada di repo (praktis, tapi siapa pun yang bisa membaca repo bisa memakai kunci itu). Lebih aman:
-buat keystore sendiri lalu isi GitHub Secrets `ZIX_KEYSTORE_BASE64`, `ZIX_KEYSTORE_PASSWORD`,
-`ZIX_KEY_ALIAS`, `ZIX_KEY_PASSWORD`. Ganti keystore = pengguna harus install ulang sekali.
-
-> Versi 1.x ditandatangani kunci lain, jadi **uninstall v1 sekali** sebelum memasang v2
-> (daftar server v1 ikut terhapus; catat dulu).
-
-## Build manual
-JDK 17 + Android SDK 34: `gradle assembleRelease` (atau buka di Android Studio).
-
-## Catatan penting
-- Aksi instalasi butuh **root** (login root atau `sudo -i`).
-- `pterodactyl-installer.se` adalah skrip komunitas, bukan resmi.
-- Update Panel/Wings: backup database dan `.env` dulu.
-- Setelah server di-install ulang, fingerprint berubah: pakai **Reset host key**.
-- File backup server berisi password/private key polos; simpan aman.
-- Pemantau latar & jadwal memakai WorkManager: waktunya perkiraan (minimal 15 menit, bisa tertunda mode hemat baterai).
-- Hapus data darurat hanya menghitung kegagalan **biometrik**, bukan PIN layar.
-- Nama aksi cepat dan alat server masih berbahasa Indonesia; menu/dialog utama sudah dua bahasa.
+## Catatan keamanan
+- Jangan commit `.env`, keystore, token, atau API key. `.gitignore` sudah memblokirnya.
+- File backup tanpa passphrase tidak berisi kredensial; file dengan passphrase berisi kredensial terenkripsi — jaga passphrase-nya.
+- Kalkulator dan statistik adalah alat bantu hitung, bukan saran trading atau jaminan hasil.
