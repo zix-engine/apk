@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ZixTheServer</string>
-    <string name="tagline">Control your servers &amp; Pterodactyl from your phone</string>
+    <string name="app_name">ZixFunction</string>
+    <string name="tagline">Servers, trading and analytics in one app</string>
     <string name="version_fmt">Version %1$s</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
@@ -129,7 +129,7 @@
     <string name="update_downloading">Downloading…</string>
     <string name="update_progress">Downloading… %1$d%%</string>
     <string name="update_permission_title">Install permission</string>
-    <string name="update_permission_msg">Allow ZixTheServer to install apps from this source, then come back and tap update again.</string>
+    <string name="update_permission_msg">Allow ZixFunction to install apps from this source, then come back and tap update again.</string>
     <string name="files">Files</string>
     <string name="files_title">Files — %1$s</string>
     <string name="files_add">Add</string>
@@ -174,7 +174,7 @@
     <string name="set_lock_desc">Ask for fingerprint / face / screen PIN when opening the app. Also blocks screenshots.</string>
     <string name="set_lock_on">App lock enabled</string>
     <string name="set_lock_unsupported">Set up a screen lock (PIN/pattern/fingerprint) in your phone settings first.</string>
-    <string name="lock_title">Open ZixTheServer</string>
+    <string name="lock_title">Open ZixFunction</string>
     <string name="set_monitor">Background monitoring</string>
     <string name="set_monitor_desc">Checks about every 15 minutes and notifies you when a server goes offline or recovers.</string>
     <string name="mon_channel">Server status</string>
