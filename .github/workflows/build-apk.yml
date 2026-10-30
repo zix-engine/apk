@@ -42,6 +42,14 @@ jobs:
           echo "ZIX_KEY_ALIAS=${{ secrets.ZIX_KEY_ALIAS }}" >> "$GITHUB_ENV"
           echo "ZIX_KEY_PASSWORD=${{ secrets.ZIX_KEY_PASSWORD }}" >> "$GITHUB_ENV"
 
+      - name: Peringatan tanda tangan
+        if: env.HAS_KEYSTORE != 'true'
+        run: echo "::warning::Secrets keystore belum diisi. APK memakai kunci debug dan TIDAK bisa meng-update aplikasi lama. Lihat README bagian 'Tanda tangan'."
+
+      - name: Unit test (statistik & kalkulator)
+        continue-on-error: true
+        run: gradle testDebugUnitTest --no-daemon
+
       - name: Build APK release
         env:
           APP_VERSION_NAME: ${{ steps.ver.outputs.name }}
@@ -49,18 +57,17 @@ jobs:
         run: gradle assembleRelease --no-daemon
 
       - name: Ganti nama APK
-        run: cp app/build/outputs/apk/release/app-release.apk "ZixTheServer-v${{ steps.ver.outputs.name }}.apk"
+        run: cp app/build/outputs/apk/release/app-release.apk "ZixFunction-v${{ steps.ver.outputs.name }}.apk"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ZixTheServer
-          path: ZixTheServer-v*.apk
+          name: ZixFunction
+          path: ZixFunction-v*.apk
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.name }}
-          name: ZixTheServer v${{ steps.ver.outputs.name }}
-          files: ZixTheServer-v*.apk
+          name: ZixFunction v${{ steps.ver.outputs.name }}
+          files: ZixFunction-v*.apk
           generate_release_notes: true
-          
