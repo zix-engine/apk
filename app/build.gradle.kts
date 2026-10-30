@@ -21,24 +21,30 @@ android {
         buildConfigField("String", "GITHUB_REPO", "\"$githubRepo\"")
     }
 
-    // Tanda tangan HARUS tetap sama agar APK baru bisa menimpa (update) yang lama.
-    // Bawaan: keystore di repo. Lebih aman: isi GitHub Secrets (lihat README).
-    signingConfigs {
-        create("zix") {
-            storeFile = file(System.getenv("ZIX_KEYSTORE_FILE") ?: "zix-release.jks")
-            storePassword = System.getenv("ZIX_KEYSTORE_PASSWORD") ?: "zixtheserver"
-            keyAlias = System.getenv("ZIX_KEY_ALIAS") ?: "zix"
-            keyPassword = System.getenv("ZIX_KEY_PASSWORD") ?: "zixtheserver"
+    // Tanda tangan harus SAMA dari rilis ke rilis agar APK baru bisa meng-update yang lama.
+    // Kunci TIDAK disimpan di repo: CI mengisinya dari GitHub Secrets lewat variabel lingkungan
+    // ZIX_KEYSTORE_FILE / ZIX_KEYSTORE_PASSWORD / ZIX_KEY_ALIAS / ZIX_KEY_PASSWORD.
+    // Tanpa itu build memakai kunci debug (bisa dipasang baru, tetapi tidak bisa menimpa instalasi lama).
+    val ksFile = System.getenv("ZIX_KEYSTORE_FILE")
+    val hasKeystore = !ksFile.isNullOrBlank() && file(ksFile).exists()
+    if (hasKeystore) {
+        signingConfigs {
+            create("zix") {
+                storeFile = file(ksFile!!)
+                storePassword = System.getenv("ZIX_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ZIX_KEY_ALIAS")
+                keyPassword = System.getenv("ZIX_KEY_PASSWORD")
+            }
         }
     }
 
     buildTypes {
         debug {
-            signingConfig = signingConfigs.getByName("zix")
+            if (hasKeystore) signingConfig = signingConfigs.getByName("zix")
         }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("zix")
+            signingConfig = if (hasKeystore) signingConfigs.getByName("zix") else signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -84,6 +90,8 @@ dependencies {
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.work:work-runtime:2.9.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    testImplementation("junit:junit:4.13.2")
 
     // SSH client (fork JSch yang aktif dirawat, mendukung algoritma modern)
     implementation("com.github.mwiede:jsch:0.2.18")
