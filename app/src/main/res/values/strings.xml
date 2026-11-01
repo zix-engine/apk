@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ZixTheServer</string>
-    <string name="tagline">Kontrol server &amp; Pterodactyl dari HP</string>
+    <string name="app_name">ZixFunction</string>
+    <string name="tagline">Server, trading, dan analitik dalam satu aplikasi</string>
     <string name="version_fmt">Versi %1$s</string>
 
     <!-- Umum -->
@@ -145,7 +145,7 @@
     <string name="update_downloading">Mengunduh…</string>
     <string name="update_progress">Mengunduh… %1$d%%</string>
     <string name="update_permission_title">Izin pasang aplikasi</string>
-    <string name="update_permission_msg">Izinkan ZixTheServer memasang aplikasi dari sumber ini, lalu kembali dan ketuk update lagi.</string>
+    <string name="update_permission_msg">Izinkan ZixFunction memasang aplikasi dari sumber ini, lalu kembali dan ketuk update lagi.</string>
     <!-- v2.1: File manager -->
     <string name="files">File</string>
     <string name="files_title">File — %1$s</string>
@@ -197,7 +197,7 @@
     <string name="set_lock_desc">Minta sidik jari / wajah / PIN layar saat membuka aplikasi. Juga memblokir screenshot.</string>
     <string name="set_lock_on">Kunci aplikasi aktif</string>
     <string name="set_lock_unsupported">Atur dulu kunci layar (PIN/pola/sidik jari) di pengaturan HP.</string>
-    <string name="lock_title">Buka ZixTheServer</string>
+    <string name="lock_title">Buka ZixFunction</string>
     <string name="set_monitor">Pantau server di latar</string>
     <string name="set_monitor_desc">Cek tiap ±15 menit dan beri notifikasi saat server offline atau pulih.</string>
     <string name="mon_channel">Status server</string>
@@ -310,6 +310,8 @@
     <string name="backup_pass_hint">Passphrase (kosongkan = tanpa enkripsi)</string>
     <string name="backup_pass_ask">Passphrase backup</string>
     <string name="backup_pass_wrong">Passphrase salah atau file rusak</string>
+    <string name="session_expired">Sesi berakhir. Silakan login lagi.</string>
+    <string name="no_permission_servers">Akunmu belum punya izin melihat server. Hubungi Owner.</string>
 </resources>
 
 

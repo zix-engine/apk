@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="splash_bg">#0A0E1A</color>
+    <color name="splash_bg">#0C0B1E</color>
     <color name="ic_bg_top">#0F172A</color>
     <color name="ic_bg_bottom">#1E1B4B</color>
 </resources>
