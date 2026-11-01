@@ -15,7 +15,7 @@ app/                    modul Android (package com.roziq.zixtheserver — dipert
 .github/workflows/      build APK + rilis otomatis
 IMPLEMENTATION_STATUS.md
 ```
-Backend (Node/MySQL) **belum ada** di versi ini.
+Backend (Node.js + MariaDB): folder [`backend/`](backend/README.md) — login, akun, izin, audit; pasang di VPS dengan `deploy/install-ubuntu.sh`.
 
 ## Build
 **GitHub Actions (disarankan):** push ke repo **publik**; workflow `Build & Release APK` membangun APK dan membuat Release
@@ -32,8 +32,8 @@ Tanpa Secrets, APK memakai kunci debug: bisa dipasang baru tetapi **tidak bisa m
 Buat keystore: `keytool -genkeypair -v -keystore zix.jks -alias zix -keyalg RSA -keysize 2048 -validity 36500`,
 lalu `base64 -w0 zix.jks` → isi `ZIX_KEYSTORE_BASE64`. Jangan commit file `.jks`.
 
-## Backend, MySQL/MariaDB, migration, Owner pertama, endpoint API
-Belum ada di versi ini (lihat status). Rencananya ada di `IMPLEMENTATION_STATUS.md`.
+## Backend, MariaDB, migrasi, Owner pertama, endpoint API
+Lihat [backend/README.md](backend/README.md). Di aplikasi: layar login menerima alamat server `https://…`; untuk server tanpa domain (sertifikat self-signed) aplikasi menawarkan mengunci sidik jari sertifikat setelah kamu mencocokkannya dengan output skrip pemasangan. Pilihan **Mode lokal** tetap tersedia.
 
 ## Backup & restore
 Menu ⋮ › **Full Backup & Restore** (atau Pengaturan). Satu ZIP berisi `manifest.json` (versi, kategori, checksum SHA-256) dan

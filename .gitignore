@@ -17,3 +17,4 @@
 /local.properties
 build/
 local.properties
+node_modules/

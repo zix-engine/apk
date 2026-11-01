@@ -6,6 +6,10 @@ tidak diklaim selesai — yang tertera di bawah adalah yang benar-benar ada di k
 
 Legenda: ✅ ada di kode • 🟡 sebagian • ⛔ belum dikerjakan (butuh backend/server/API key/pekerjaan lanjutan)
 
+## Versi 3.1 — backend akun + login
+- `backend/`: API Node.js + MariaDB (login, sesi, akun Owner/Admin/User, izin, audit, rate limit), migrasi, CLI Owner, skrip pasang Ubuntu, 22 tes otomatis yang LOLOS.
+- Android: login (pin sertifikat untuk server tanpa domain), ganti password paksa, akun saya, kelola akun, audit log, gating menu berdasarkan izin.
+
 ## Versi 3.0.0-alpha — yang dikerjakan di rilis ini
 - Rebrand ke **ZixFunction** (package/applicationId `com.roziq.zixtheserver` tetap → bisa update dari versi lama).
 - Tema baru **Zix Indigo** (default instalasi baru; tema lama tetap tersedia).
@@ -20,19 +24,19 @@ Legenda: ✅ ada di kode • 🟡 sebagian • ⛔ belum dikerjakan (butuh backe
 | 1 | Identitas & tujuan | ✅ | Nama ZixFunction, ID aplikasi dipertahankan, fitur lama tetap |
 | 2 | UI/UX baru | 🟡 | Tema Indigo, animasi, kartu; belum ada bottom navigation/halaman beranda terpadu |
 | 3 | Splash & pemulihan state | 🟡 | Splash animasi ada & tidak muncul ulang saat kembali dari latar; pemulihan state setelah proses dimatikan sistem belum dibuat |
-| 4 | Login & autentikasi Owner/Admin/User | ⛔ | Butuh backend |
-| 5 | Dashboard Owner | ⛔ | Butuh backend |
-| 6 | Dashboard User & hak akses | ⛔ | Butuh backend |
-| 7 | Create Account oleh Owner | ⛔ | Butuh backend |
-| 8 | Ganti/reset password | ⛔ | Butuh backend |
-| 9 | Database & backend | ⛔ | Hanya SQLite lokal untuk trading. Backend Node/MySQL belum dibuat (tidak bisa diuji di lingkungan ini) |
+| 4 | Login & autentikasi Owner/Admin/User | 🟡 | Backend ✅ teruji (22 tes). Layar login Android ditulis tapi belum dikompilasi. Mode lokal tetap ada |
+| 5 | Dashboard Owner | 🟡 | Kelola akun + audit log. Belum ada ringkasan statistik penggunaan |
+| 6 | Dashboard User & hak akses | 🟡 | Izin per akun disimpan di backend; di aplikasi hanya menyembunyikan menu (bukan batas keamanan untuk data lokal di HP) |
+| 7 | Create Account oleh Owner | ✅ | Backend teruji; password sementara acak tampil sekali, wajib diganti saat login pertama |
+| 8 | Ganti/reset password | 🟡 | ✅ ganti password, reset oleh Owner/Admin, CLI darurat. ⛔ reset via email (belum ada layanan email) |
+| 9 | Database & backend | 🟡 | Backend Node + MariaDB (akun, sesi, audit) dengan migrasi & skrip pasang VPS. Adapter MariaDB & skrip pasang belum diuji di VPS nyata. Data trading belum disinkron ke backend |
 | 10 | Server, VPS, NAT, SSH, Docker, Pterodactyl | 🟡 | ✅ SSH multi-tab, SFTP, Docker/UFW/cron/proses/layanan/log, Pterodactyl API+konsol, jump host, WoL, monitor. ⛔ NAT diagnostics, audit log server |
 | 11 | Modul trading | 🟡 | ✅ 12 kalkulator, jurnal. ⛔ market/watchlist/chart (butuh sumber data) |
 | 12 | Backtest & rekap statistik | ✅ | Manual-entry: win rate, net R, expectancy, PF, max DD, streak, per bulan/instrumen/TF/setup/sesi, perbandingan proyek, ekspor CSV/JSON. ⛔ impor CSV, lampiran gambar, PDF |
 | 13 | Market intelligence & notifikasi | ⛔ | Butuh API data pasar |
 | 14 | AI Assistant | ⛔ | Butuh backend + API key penyedia |
 | 15 | Full Backup & Restore | 🟡 | ✅ lokal lengkap (server, pengaturan, trading). ⛔ data backend, backup otomatis/pengingat |
-| 16 | Keamanan | 🟡 | ✅ kunci aplikasi biometrik/PIN, FLAG_SECURE, kredensial terenkripsi, backup terenkripsi, hapus data darurat. ⛔ RBAC, audit log, 2FA, rate limit (butuh backend) |
+| 16 | Keamanan | 🟡 | ✅ kunci aplikasi, FLAG_SECURE, kredensial terenkripsi, backup terenkripsi, hapus data darurat; backend: hash scrypt, token ter-hash, rotasi refresh, rate limit, penguncian login, RBAC, audit log, pin sertifikat di aplikasi. ⛔ 2FA, reset via email |
 | 17 | Developer / GitHub / build | ✅ | Actions build+release, update dalam aplikasi, tes CI (non-blokir) |
 | 18 | Preferensi & pendukung | 🟡 | Tema, bahasa ID/EN, font, haptic, dll. |
 | 19 | Roadmap terpadu | 🟡 | Lihat tabel di atas; jumlah fitur tidak diklaim |
@@ -41,9 +45,10 @@ Legenda: ✅ ada di kode • 🟡 sebagian • ⛔ belum dikerjakan (butuh backe
 | 22 | Definisi Full Backup | 🟡 | Dipenuhi untuk data lokal; kategori backend dinyatakan "belum ada" di manifest & laporan |
 
 ## Rencana lanjutan (butuh keputusan/sumber daya darimu)
-1. **Backend** (Node.js + Express + MariaDB/MySQL): migrasi SQL, hash password (argon2id/bcrypt), JWT access+refresh
+0. ✅ (v3.1) Backend akun + login Android sudah dibuat; tahap berikut: sinkron data trading ke backend, dashboard statistik Owner.
+1. ~~Backend~~ (sudah, lihat `backend/README.md`; daftar lama: (Node.js + Express + MariaDB/MySQL): migrasi SQL, hash password (argon2id/bcrypt), JWT access+refresh
    dengan rotasi, RBAC Owner/Admin/User, audit log, rate limit, setup Owner pertama lewat CLI sekali pakai.
-   Perlu: VPS/domain/HTTPS dan pilihan DB. Tidak bisa diuji di lingkungan pembuatan (tanpa paket npm & DB).
+   Perlu: VPS/domain/HTTPS dan pilihan DB.)
 2. Android: layar login, session aman, dashboard Owner/User, manajemen akun, mode "lokal" tetap tersedia.
 3. Market data & chart (butuh penyedia data/lisensi), kalender ekonomi, alert harga.
 4. AI Assistant lewat backend (API key hanya di server).
