@@ -75,6 +75,26 @@
             android:exported="false" />
 
         <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ChangePasswordActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AccountActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".UsersActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AuditActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ListToolActivity"
             android:exported="false" />
 
