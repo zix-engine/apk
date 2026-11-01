@@ -80,6 +80,37 @@ abstract class BaseActivity : AppCompatActivity() {
 
     protected fun onUi(block: () -> Unit) = runOnUiThread { if (!isDestroyed && !isFinishing) block() }
 
+    // ---------------------------------------------------------------- Backend API
+
+    /** Menjalankan panggilan API di thread latar. Sesi berakhir → otomatis ke layar login. */
+    protected fun <T> runApi(work: () -> T, done: (T) -> Unit, failed: ((ApiException) -> Unit)? = null) {
+        thread(name = "api-call") {
+            try {
+                val r = work()
+                onUi { done(r) }
+            } catch (e: ApiException) {
+                onUi {
+                    if (e.code == "SESSION_EXPIRED") {
+                        toast(R.string.session_expired)
+                        goLogin()
+                    } else if (failed != null) {
+                        failed(e)
+                    } else {
+                        toast(e.message ?: e.code)
+                    }
+                }
+            } catch (e: Exception) {
+                onUi { toast(e.message ?: e.javaClass.simpleName) }
+            }
+        }
+    }
+
+    protected fun goLogin() {
+        startActivity(
+            Intent(this, LoginActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        )
+    }
+
     // ---------------------------------------------------------------- Update
 
     /** Cek rilis terbaru di GitHub. [manual] = tampilkan hasil walau tidak ada update. */

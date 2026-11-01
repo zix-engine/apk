@@ -125,7 +125,16 @@ class SplashActivity : BaseActivity() {
     private fun goMain() {
         if (launched) return
         launched = true
-        startActivity(Intent(this, MainActivity::class.java))
+        val auth = AuthStore.get(this)
+        val target = when {
+            auth.mode == "" -> LoginActivity::class.java
+            auth.mode == "remote" && !auth.hasSession() -> LoginActivity::class.java
+            auth.mode == "remote" && auth.user?.mustChangePassword == true -> ChangePasswordActivity::class.java
+            else -> MainActivity::class.java
+        }
+        val next = Intent(this, target)
+        if (target == ChangePasswordActivity::class.java) next.putExtra(ChangePasswordActivity.EXTRA_FORCED, true)
+        startActivity(next)
         finish()
         @Suppress("DEPRECATION")
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)

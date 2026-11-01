@@ -109,6 +109,20 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        val auth = AuthStore.get(this)
+        if (auth.mode == "remote") {
+            if (!auth.hasSession()) {
+                goLogin()
+                return
+            }
+            if (auth.user?.mustChangePassword == true) {
+                startActivity(Intent(this, ChangePasswordActivity::class.java).putExtra(ChangePasswordActivity.EXTRA_FORCED, true))
+                return
+            }
+            // Perbarui role/izin terbaru dari server; gagal jaringan diabaikan (pakai cache).
+            runApi({ ApiClient.get(this).me() }, { b.fabAdd.visibility = if (auth.can("server.manage")) View.VISIBLE else View.GONE }, { })
+        }
+        b.fabAdd.visibility = if (auth.can("server.manage")) View.VISIBLE else View.GONE
         refresh()
         pingAll()
     }
@@ -125,6 +139,7 @@ class MainActivity : BaseActivity() {
                 .thenByDescending { it.lastUsed }
                 .thenBy { it.name.lowercase() }
         )
+        if (!AuthStore.get(this).can("server.view")) all = emptyList()
         buildGroups()
         applyFilter()
         updateShortcuts()
@@ -184,23 +199,21 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showGlobalTools() {
-        val labels = arrayOf(
-            "Trading (kalkulator, backtest, jurnal)",
-            "Full Backup & Restore",
-            getString(R.string.monitors_title),
-            getString(R.string.sched_title),
-            getString(R.string.broadcast_title)
-        )
+        val auth = AuthStore.get(this)
+        class Entry(val label: String, val cls: Class<*>, val perm: String?)
+        val entries = listOf(
+            Entry(if (auth.mode == "remote") "Akun & manajemen" else "Akun / masuk ke server", AccountActivity::class.java, null),
+            Entry("Trading (kalkulator, backtest, jurnal)", TradingActivity::class.java, "trading.use"),
+            Entry("Full Backup & Restore", BackupActivity::class.java, "backup.use"),
+            Entry(getString(R.string.monitors_title), MonitorsActivity::class.java, "server.view"),
+            Entry(getString(R.string.sched_title), SchedulesActivity::class.java, "server.manage"),
+            Entry(getString(R.string.broadcast_title), BroadcastActivity::class.java, "server.manage")
+        ).filter { it.perm == null || auth.can(it.perm) }
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.tools)
-            .setItems(labels) { _, which ->
-                val cls = when (which) {
-                    0 -> TradingActivity::class.java
-                    1 -> BackupActivity::class.java
-                    2 -> MonitorsActivity::class.java
-                    3 -> SchedulesActivity::class.java
-                    else -> BroadcastActivity::class.java
-                }
+            .setItems(entries.map { it.label }.toTypedArray()) { _, which ->
+                val e = entries[which]
+                val cls = if (e.cls == AccountActivity::class.java && auth.mode != "remote") LoginActivity::class.java else e.cls
                 startActivity(Intent(this, cls))
             }
             .show()
@@ -250,7 +263,10 @@ class MainActivity : BaseActivity() {
             }
         }
         b.tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
-        b.tvEmpty.setText(if (all.isEmpty()) R.string.empty_servers else R.string.no_results)
+        b.tvEmpty.setText(
+            if (!AuthStore.get(this).can("server.view")) R.string.no_permission_servers
+            else if (all.isEmpty()) R.string.empty_servers else R.string.no_results
+        )
         updateSummary()
     }
 
@@ -309,13 +325,18 @@ class MainActivity : BaseActivity() {
 
     private fun showMenu(s: Server, anchor: View) {
         val popup = PopupMenu(this, anchor)
-        popup.menu.add(0, 1, 0, getString(R.string.menu_edit))
-        popup.menu.add(0, 2, 1, getString(R.string.menu_duplicate))
+        val manage = AuthStore.get(this).can("server.manage")
+        if (manage) {
+            popup.menu.add(0, 1, 0, getString(R.string.menu_edit))
+            popup.menu.add(0, 2, 1, getString(R.string.menu_duplicate))
+        }
         popup.menu.add(0, 3, 2, getString(R.string.menu_copy_ssh))
-        popup.menu.add(0, 4, 3, getString(R.string.menu_reset_hostkey))
-        popup.menu.add(0, 6, 4, getString(R.string.menu_install_key))
+        if (manage) {
+            popup.menu.add(0, 4, 3, getString(R.string.menu_reset_hostkey))
+            popup.menu.add(0, 6, 4, getString(R.string.menu_install_key))
+        }
         if (s.mac.isNotBlank()) popup.menu.add(0, 7, 5, getString(R.string.menu_wol))
-        popup.menu.add(0, 5, 9, getString(R.string.menu_delete))
+        if (manage) popup.menu.add(0, 5, 9, getString(R.string.menu_delete))
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> showEditor(s)
